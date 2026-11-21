@@ -1,0 +1,168 @@
+.alumni-room {
+  --paper: #eeece6;
+  min-height: min(780px, calc(100svh - 62px));
+  overflow: hidden;
+  padding: clamp(25px, 4vw, 50px) 0 28px;
+  background: radial-gradient(ellipse at 50% 25%, #faf8f3 0%, transparent 55%), var(--paper);
+  color: #232820;
+}
+.alumni-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-inline: clamp(18px, 6vw, 100px); }
+.alumni-heading h1 { margin: 0; color: inherit; font: 500 clamp(25px, 4vw, 47px)/1.2 Georgia, "Songti SC", "SimSun", serif; }
+.alumni-heading select { width: auto; max-width: 46%; margin: 0; padding: 7px 10px; border: 1px solid #afb1a4; border-radius: 4px; background: #f6f6ee; font: inherit; }
+.alumni-shelf {
+  --size: clamp(160px, 46vw, 310px);
+  position: relative; height: calc(var(--size) * 1.29 + 26px); margin-top: clamp(15px, 4vh, 44px);
+  isolation: isolate; perspective: 950px; touch-action: pan-y pinch-zoom; user-select: none;
+}
+.alumni-platform {
+  position: absolute; inset: auto -15% 6% -15%; height: 32%;
+  border-radius: 50%; background: linear-gradient(#dad4c0, #ece5cf 30%, #a89e83 87%, #7b7059);
+  box-shadow: 0 12px 21px #25251e25, inset 0 -5px 0 #53574c52;
+  transform: rotateX(42deg);
+}
+.alumni-records { position: absolute; inset: 0; transform-style: preserve-3d; }
+.alumni-record {
+  position: absolute; left: 50%; bottom: 20%; width: calc(var(--size) * .76); height: var(--size);
+  display: block; border: 0; padding: 0; background: transparent; color: #fff9e9;
+  cursor: pointer; transform-style: preserve-3d; transform-origin: center bottom;
+  transform: translate(-50%, 0) translate3d(var(--x, 0px), var(--y, 0px), var(--z, 0px)) rotateY(var(--yaw, 0deg));
+  transition: transform 460ms cubic-bezier(.2,.67,.22,1);
+}
+.alumni-cover {
+  position: absolute; inset: 0; display: block; text-align: left;
+  border-radius: 1px 3px 3px 1px;
+  border: 1px solid #ffffff29;
+  background: linear-gradient(90deg, #0003, transparent 8%), var(--ink);
+  box-shadow: 0 8px 15px #27231933;
+  backface-visibility: hidden;
+  transform: translateZ(.6px);
+  overflow: hidden;
+}
+.alumni-cover img {
+  position: absolute; top: 8%; left: 11%;
+  width: 78%; height: 58%; display: block;
+  object-fit: cover; object-position: center 30%;
+}
+.alumni-caption { position: absolute; inset: auto 9% 7% 11%; color: #f5ecdc; }
+.alumni-caption small { display: block; margin-top: .45em; font-size: clamp(8px, 1.1vw, 12px); line-height: 1.2; }
+.alumni-caption strong { display: block; font: 600 clamp(23px, 3vw, 44px)/1.06 Georgia, "Songti SC", "SimSun", serif; letter-spacing: .055em; }
+.alumni-hinge {
+  position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: left center;
+  transform: translateZ(calc(var(--depth) / 2));
+}
+.alumni-endpaper, .alumni-title-page {
+  position: absolute; inset: 2px 1px 2px 3px;
+  border-radius: 1px 2px 2px 1px;
+  background: linear-gradient(90deg, #dfd1b6, #faf5e9 14%);
+}
+.alumni-endpaper { transform: rotateY(180deg) translateZ(.6px); backface-visibility: hidden; }
+.alumni-title-page {
+  display: grid; align-content: center; gap: 8px; text-align: center; color: #39382f;
+  transform: translateZ(calc(var(--depth) / 2 - 1px));
+}
+.alumni-title-page strong { font: 600 27px/1.15 Georgia, "Songti SC", "SimSun", serif; }
+.alumni-title-page small { font-size: 10px; }
+.alumni-record.is-extracting { visibility: hidden; }
+dialog.alumni-extraction {
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0; overflow: hidden;
+  perspective: 1000px; perspective-origin: center; background: transparent;
+}
+.alumni-extraction::backdrop { background: #27241c4d; }
+.alumni-extraction-book { position: absolute; inset: 0 auto auto 0; transform-style: preserve-3d; }
+.alumni-extraction .alumni-preview-close {
+  z-index: 2; top: max(18px, env(safe-area-inset-top)); right: 18px; width: 44px; height: 44px;
+  border-radius: 50%; background: #f6f1e6; color: #3c382e; font: 26px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+.alumni-preview-copy {
+  display: grid; gap: 5px; padding: 8px 12px; text-align: left; opacity: 0;
+}
+.alumni-extraction.is-open .alumni-preview-copy { opacity: 1; transition: opacity 240ms ease; }
+.alumni-preview-copy p { margin: 0; color: inherit; font: 10px/1.48 system-ui, sans-serif; overflow-wrap: anywhere; }
+.alumni-preview-copy strong { font-size: clamp(16px, 4.5vw, 26px); }
+.alumni-preview-copy small { color: #665b4a; font-size: 8px; }
+.alumni-preview-copy a { margin-top: 4px; color: #37382d; font: 600 10px/1.3 system-ui,sans-serif; text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 640px) {
+  .alumni-preview-copy { padding-inline: 21px; gap: 9px; }
+  .alumni-preview-copy p, .alumni-preview-copy a { font-size: 13px; }
+  .alumni-preview-copy small { font-size: 10px; }
+}
+.alumni-monogram { position: absolute; inset: 0; display: grid; place-items: center; font: 700 calc(var(--size) * .55)/1 "Songti SC", "SimSun", serif; color: #ffffff3b; }
+.alumni-book {
+  --depth: clamp(14px, 2.3vw, 24px);
+  display: block; position: absolute; inset: 0;
+  transform-style: preserve-3d;
+}
+.alumni-back-cover {
+  position: absolute; inset: 0;
+  background: color-mix(in srgb, var(--ink), #161611 20%);
+  transform: translateZ(calc(var(--depth) / -2));
+}
+.alumni-pages {
+  position: absolute;
+  background: repeating-linear-gradient(90deg, #eee5d2 0 2px, #d5c8ad 2px 3px);
+}
+.alumni-pages-edge {
+  top: 3px; bottom: 3px; left: 100%; width: var(--depth);
+  transform-origin: left center;
+  transform: translateZ(calc(var(--depth) / 2)) rotateY(90deg);
+}
+.alumni-pages-top, .alumni-pages-bottom {
+  left: 4px; right: 2px; height: var(--depth);
+  background: repeating-linear-gradient(0deg, #eee5d2 0 2px, #d5c8ad 2px 3px);
+}
+.alumni-pages-top {
+  top: 0; transform-origin: center top;
+  transform: translateZ(calc(var(--depth) / 2)) rotateX(-90deg);
+}
+.alumni-pages-bottom {
+  top: 100%; transform-origin: center top;
+  transform: translateZ(calc(var(--depth) / 2)) rotateX(-90deg);
+}
+.alumni-spine {
+  position: absolute; top: 0; right: 100%; height: 100%; width: var(--depth);
+  display: grid; place-items: center; writing-mode: vertical-rl;
+  color: #fff8df; font: 700 clamp(11px, 1.7vw, 17px)/1 "Songti SC", "SimSun", serif;
+  background: linear-gradient(90deg, #0005, #ffffff18, #0002), var(--ink);
+  transform-origin: right center;
+  transform: translateZ(calc(var(--depth) / 2)) rotateY(-90deg);
+}
+.alumni-controls { display: flex; align-items: center; justify-content: center; gap: clamp(18px, 4vw, 58px); padding-inline: 14px; }
+.alumni-controls button { color: inherit; cursor: pointer; }
+.alumni-controls > button {
+  flex: 0 0 40px; height: 40px; border-radius: 50%; border: 1px solid #8b8e80; background: #ffffff60;
+  font: 24px/1 system-ui, sans-serif;
+}
+.alumni-controls > button:disabled { opacity: .35; cursor: default; }
+.alumni-selection { text-align: center; }
+.alumni-selection p { margin: 0; color: inherit; font-size: clamp(13px, 2.2vw, 17px); }
+.alumni-open { margin-top: 5px; background: none; border: 0; text-decoration: underline; text-underline-offset: 4px; padding: 6px; font: inherit; }
+.alumni-room .alumni-position { display: block; margin: 15px auto 0; width: min(72%, 560px); padding: 0; accent-color: #51594b; cursor: pointer; }
+.alumni-hero.building-hero {
+  isolation: isolate;
+  background: radial-gradient(ellipse at 75% 35%, color-mix(in srgb, var(--ink), #fff 40%), transparent 63%),
+    color-mix(in srgb, var(--ink), #151d1b 48%);
+}
+.alumni-hero .building-hero-copy { z-index: 2; pointer-events: none; }
+.alumni-hero .building-hero-copy :is(h1, p) { color: #fff8e9; }
+.alumni-hero-book {
+  position: absolute; z-index: 1; top: 10%; bottom: 12%; right: clamp(45px, 16vw, 250px);
+  aspect-ratio: .76; perspective: 820px;
+}
+.alumni-hero-book .alumni-book { transform: rotateY(-17deg) rotateX(3deg); }
+@media (max-width: 620px) {
+  .alumni-hero-book { top: 7%; bottom: 22%; right: 14%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .alumni-room *, .alumni-room *::after { animation-duration: 0ms !important; transition-duration: 0ms !important; }
+}
+
+.alumni-records-frame {
+  display: block;
+  width: 100%;
+  height: calc(100svh - 120px - env(safe-area-inset-bottom, 0px));
+  min-height: 360px;
+  border: 0;
+  background: #fffdf9;
+}

@@ -1,6 +1,29 @@
 'use strict';
 const WORLD={w:1800,h:1800};
 const places=window.CAMPUS_LAYOUT.places;
+const publishedBuildings=window.CAMPUS_PUBLISHED_BUILDINGS||[];
+const requestedId=new URLSearchParams(location.search).get('building')||'hall';
+const selectedBuilding=publishedBuildings.find(b=>b.id===requestedId||b.mapId===requestedId);
+const selectedMapId=selectedBuilding?.mapId||requestedId;
+const selectedTarget=[...places,...window.CAMPUS_LAYOUT.buildingInfo].find(b=>b.id===selectedMapId);
+const english=CampusLanguage.isEnglish;
+const selectedName=selectedBuilding?(english?englishBuildings[selectedBuilding.id]?.name||selectedBuilding.name:selectedBuilding.name):null;
+document.getElementById('map-heading').textContent=selectedName||CampusLanguage.t('mapTitle');
+document.getElementById('map-navigation').hidden=window.top!==window;
+document.getElementById('map-navigation').setAttribute('aria-label',english?'Map navigation':'地图导航');
+const returnLink=document.getElementById('map-return');
+returnLink.hidden=!selectedBuilding;
+if(selectedBuilding)returnLink.href='index.html?lang='+CampusLanguage.language+'#building/'+encodeURIComponent(selectedBuilding.id);
+returnLink.textContent=english?'Return to building':'返回建筑';
+const directoryLink=document.getElementById('map-directory');
+directoryLink.href='index.html?lang='+CampusLanguage.language+'#buildings';
+directoryLink.textContent=english?'Building directory':'建筑目录';
+document.getElementById('map-description').textContent=selectedBuilding
+ ? (english?englishBuildings[selectedBuilding.id]?.intro||selectedBuilding.intro:selectedBuilding.intro)
+ : (english?'Campus overview. No listed building is selected.':'校园位置总览，当前未选中目录内的建筑。');
+document.getElementById('map-help').textContent=english
+ ? 'Focus the map: arrow keys pan, + / − zoom, Home resets. Tab moves to the next control. Drag to pan; use the wheel or two fingers to zoom.'+(selectedTarget?' The outlined location is selected.':'')
+ : '聚焦地图后：方向键平移，+ / − 缩放，Home 重置，Tab 移至下一控件。可拖动平移，滚轮或双指缩放。'+(selectedTarget?'边框标出选中位置。':'');
 const mapNames = {
   'mengfang-library': 'Mengfang Library',
   qiangong: 'Qiangong Yuan',
@@ -18,17 +41,19 @@ class BuildingMap extends Phaser.Scene{
  preload(){this.load.image('auditorium',window.CAMPUS_LAYOUT.hallImage);for(const [key,value] of Object.entries(window.CAMPUS_LAYOUT.materialImages||{}))this.load.image('material-'+key,value);if(window.CAMPUS_LAYOUT.sportsImage)this.load.image('sports-ground',window.CAMPUS_LAYOUT.sportsImage);if(window.CAMPUS_LAYOUT.liuchaoImage)this.load.image('liuchao',window.CAMPUS_LAYOUT.liuchaoImage);if(window.CAMPUS_LAYOUT.fountainImage)this.load.image('fountain',window.CAMPUS_LAYOUT.fountainImage);for(const b of window.CAMPUS_LAYOUT.buildingSprites)this.load.image('building-'+b.slug,b.image)}
  create(){
   this.drawCampus();
-  const id=new URLSearchParams(location.search).get('building')||'hall';
-  const target=[...places,...window.CAMPUS_LAYOUT.buildingInfo].find(b=>b.id===id);
+  const target=selectedTarget;
   const cam=this.cameras.main;let zoom=.8;
   cam.setBounds(0,0,WORLD.w,WORLD.h).setZoom(zoom);
   const focus=()=>{if(target)cam.centerOn(target.x+target.w/2,target.y+target.h/2);else cam.centerOn(WORLD.w/2,WORLD.h/2)};
   focus();
   document.title = target
-    ? mapName(target) + ' · ' + CampusLanguage.t('mapSuffix')
+    ? (selectedName||mapName(target)) + ' · ' + CampusLanguage.t('mapSuffix')
     : CampusLanguage.t('mapTitle');
   if(target){this.add.graphics().setDepth(20).lineStyle(3,0xb38b49,.9).strokeRoundedRect(target.x-9,target.y-13,target.w+18,target.h+25,10)}
   const canvas=this.game.canvas;canvas.style.cursor='grab';canvas.style.touchAction='none';
+  canvas.tabIndex=0;canvas.setAttribute('role','region');
+  canvas.setAttribute('aria-label',selectedName?selectedName+' · '+CampusLanguage.t('mapSuffix'):CampusLanguage.t('mapTitle'));
+  canvas.setAttribute('aria-describedby','map-description map-help');
   this.input.enabled=false;
   const pointers=new Map();
   const point=ev=>{const r=canvas.getBoundingClientRect();return {x:(ev.clientX-r.left)*this.scale.width/r.width,y:(ev.clientY-r.top)*this.scale.height/r.height}};
@@ -40,18 +65,31 @@ class BuildingMap extends Phaser.Scene{
    cam.scrollX=worldX-cam.width/2-(to.x-cam.width/2)/zoom;
    cam.scrollY=worldY-cam.height/2-(to.y-cam.height/2)/zoom;
   };
-  const down=ev=>{if(ev.pointerType==='mouse'&&ev.button!==0)return;if(pointers.size>=2)return;ev.preventDefault();pointers.set(ev.pointerId,point(ev));canvas.setPointerCapture(ev.pointerId);canvas.style.cursor='grabbing'};
+  const down=ev=>{if(ev.pointerType==='mouse'&&ev.button!==0)return;if(pointers.size>=2)return;ev.preventDefault();canvas.focus({preventScroll:true});pointers.set(ev.pointerId,point(ev));canvas.setPointerCapture(ev.pointerId);canvas.style.cursor='grabbing'};
   const move=ev=>{if(!pointers.has(ev.pointerId))return;ev.preventDefault();const before=geometry();pointers.set(ev.pointerId,point(ev));const after=geometry();const ratio=before.distance>1&&after.distance>1?after.distance/before.distance:1;transform(zoom*ratio,before,after)};
   const release=ev=>{pointers.delete(ev.pointerId);if(canvas.hasPointerCapture(ev.pointerId))canvas.releasePointerCapture(ev.pointerId);canvas.style.cursor=pointers.size?'grabbing':'grab'};
   const wheel=ev=>{ev.preventDefault();const delta=ev.deltaY*(ev.deltaMode===1?16:ev.deltaMode===2?this.scale.height:1);transform(zoom*Math.exp(-Math.max(-500,Math.min(500,delta))*.0015),point(ev))};
-  const handlers={pointerdown:down,pointermove:move,pointerup:release,pointercancel:release,lostpointercapture:release,wheel};
-  for(const [name,handler] of Object.entries(handlers))canvas.addEventListener(name,handler,{passive:false});
-  this.events.once('shutdown',()=>{for(const [name,handler] of Object.entries(handlers))canvas.removeEventListener(name,handler);pointers.clear()});
   const center=()=>({x:cam.width/2,y:cam.height/2});
+  const reset=()=>{zoom=.8;cam.setZoom(zoom);focus()};
+  const keydown=ev=>{
+   if(ev.altKey||ev.ctrlKey||ev.metaKey)return;
+   const pan={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[ev.key];
+   if(pan){ev.preventDefault();cam.scrollX+=pan[0]*48/zoom;cam.scrollY+=pan[1]*48/zoom}
+   else if(ev.key==='+'||ev.key==='='||ev.key==='-'||ev.key==='−'){ev.preventDefault();transform(zoom+(ev.key==='-'||ev.key==='−'?-.15:.15),center())}
+   else if(ev.key==='Home'){ev.preventDefault();reset()}
+  };
+  const handlers={pointerdown:down,pointermove:move,pointerup:release,pointercancel:release,lostpointercapture:release,wheel,keydown};
+  for(const [name,handler] of Object.entries(handlers))canvas.addEventListener(name,handler,{passive:false});
   document.getElementById('zoom-in').onclick=()=>transform(zoom+.15,center());
   document.getElementById('zoom-out').onclick=()=>transform(zoom-.15,center());
-  document.getElementById('focus-building').onclick=()=>{zoom=.8;cam.setZoom(zoom);focus()};
+  document.getElementById('focus-building').onclick=reset;
   this.scale.on('resize',focus);
+  this.events.once('shutdown',()=>{
+   for(const [name,handler] of Object.entries(handlers))canvas.removeEventListener(name,handler);
+   for(const id of pointers.keys())if(canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);
+   pointers.clear();this.scale.off('resize',focus);
+   for(const id of ['zoom-in','zoom-out','focus-building'])document.getElementById(id).onclick=null;
+  });
  }
  label(text,x,y,size=16,color='#6d8060',spacing=0){let t=this.add.text(x,y,text,{fontFamily:'Microsoft YaHei, sans-serif',fontSize:size,color,letterSpacing:spacing}).setOrigin(.5).setDepth(7);return t}
  drawTerrain(d){

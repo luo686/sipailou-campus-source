@@ -1,0 +1,62 @@
+@font-face {
+  font-family: 'Campus Header Sans';
+  src: url('fonts/header-sans.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+.site-header, .menu-open .site-header {
+  background: #fff;
+  color: #202124;
+  border-top: 0;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 1px 2px #00000005;
+}
+.header-inner {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  column-gap: 28px;
+  width: 100%;
+  min-height: 56px;
+  height: 56px;
+  padding: 0 8px;
+  margin: 0;
+}
+.site-header .identity { grid-column: 2; grid-row: 1; color: #202124; min-width: 0; gap: 0; justify-self: start; }
+.site-header .identity > svg, .site-header .identity small, .site-header .header-links { display: none; }
+.site-header .identity > span {
+  font-family: 'Campus Header Sans', Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.site-header .glass-toggle {
+  grid-column: 1;
+  grid-row: 1;
+  order: initial;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  color: #202124;
+}
+.site-header .glass-toggle span { left: 15px; width: 18px; height: 1.5px; top: 18.5px; background: currentColor; }
+.site-header .glass-toggle span:nth-child(2) { top: 23.5px; }
+.site-header .glass-toggle span:nth-child(3) { top: 28.5px; }
+.menu-open .site-header .glass-toggle span:first-child { top: 23.5px; transform: rotate(45deg); }
+.menu-open .site-header .glass-toggle span:nth-child(2) { opacity: 0; transform: none; }
+.menu-open .site-header .glass-toggle span:nth-child(3) { top: 23.5px; transform: rotate(-45deg); }
+.header-search { grid-column: 3; grid-row: 1; display: grid; place-items: center; width: 48px; height: 48px; color: #202124; }
+.header-search svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.glass-menu a, .glass-menu a:hover, .glass-menu a[aria-current='page'] { color: #202124; }
+.home-hero::after, .home-hero .overline::before { display: none; }
+.home-hero .button.light { background: #fff; color: #202124; border: 1px solid #fff; border-radius: 4px; }
+.home-hero .button.light:hover { background: #f0f0f0; color: #202124; }
+.site-header a:focus-visible, .site-header button:focus-visible, .glass-menu a:focus-visible { outline-color: #202124; outline-offset: -3px; }
+.glass-panel { padding-top: 104px; }
+@media(max-width:360px) {
+  .header-inner { column-gap: 12px; }
+  html:lang(en) .site-header .identity > span { font-size: 15px; }
+}

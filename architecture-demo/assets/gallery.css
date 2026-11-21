@@ -1,5 +1,77 @@
-.archive-gallery { margin-top: 32px; }
-.archive-stage { position: relative; container-type: inline-size; }
+.archive-gallery { position: relative; margin-block: 38px 18px; isolation: isolate; }
+.archive-canvas {
+  display: grid;
+  column-gap: clamp(8px, 1.5vw, 13px);
+  position: relative;
+  height: clamp(290px, 47vw, 530px);
+  overflow: clip;
+  background: #fff;
+  touch-action: pinch-zoom;
+  user-select: none;
+  cursor: grab;
+}
+.archive-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, #fff 0%, #fff0 13%, #fff0 87%, #fff 100%),
+    linear-gradient(0deg, #fff 0%, #fff0 16%, #fff0 85%, #fff 100%);
+}
+.archive-canvas.is-dragging { cursor: grabbing; }
+.archive-canvas:focus-visible { outline: 2px solid #927046; outline-offset: 3px; }
+.archive-tiles { position: absolute; inset: 0; will-change: transform; }
+.archive-tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--archive-width);
+  height: var(--archive-height);
+  overflow: clip;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: #e5e2db;
+  cursor: inherit;
+  touch-action: pinch-zoom;
+}
+.archive-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: transform .25s ease;
+}
+@media (hover: hover) {
+  .archive-canvas:not(.is-dragging) .archive-tile:hover img { transform: scale(1.055); }
+}
+.archive-label {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  translate: -50%;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 10px 17px;
+  border: 1px solid #ffffffd9;
+  border-radius: 13px;
+  background: #f9f8f1e8;
+  box-shadow: 0 3px 12px #1b20251a;
+  text-align: center;
+  pointer-events: none;
+}
+.archive-label h3 { margin: 0; font-size: clamp(16px, 2vw, 20px); }
+.archive-instructions {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (prefers-reduced-motion: reduce) { .archive-tile img { transition: none; } }
+
 .gallery-prev, .gallery-next {
   display: grid;
   width: 36px;
@@ -8,87 +80,10 @@
   place-items: center;
   border: 1px solid var(--paper-edge);
   border-radius: 50%;
-  background: #fffdf8;
+  background: #ffffff;
   color: var(--navy);
 }
 .gallery-prev:disabled, .gallery-next:disabled { opacity: .35; cursor: default; }
-.archive-carousel { padding-block: 4px; }
-.archive-carousel figure {
-  width: 66.666%;
-  margin: 0;
-  opacity: .76;
-  transition: opacity .4s ease;
-}
-.archive-carousel .swiper-slide-active,
-.archive-carousel figure:hover,
-.archive-carousel figure:focus-within { opacity: 1; }
-.archive-stage > button {
-  position: absolute;
-  z-index: 2;
-  top: calc(25cqw + 4px);
-  transform: translateY(-50%);
-  width: 38px;
-  height: clamp(44px, 9cqw, 64px);
-  border: 1px solid #fff8e852;
-  border-radius: 8px;
-  background: #152d48dc;
-  color: #fff;
-  box-shadow: 0 2px 10px #152d4830;
-  transition: background-color .18s ease, opacity .18s ease;
-}
-.archive-stage > button:hover:not(:disabled) { background: var(--navy); }
-.archive-stage .gallery-prev { left: 8px; }
-.archive-stage .gallery-next { right: 8px; }
-.archive-stage .swiper-button-lock { display: none; }
-.archive-gallery .archive-scrollbar {
-  position: relative;
-  inset: auto;
-  width: min(68%, 340px);
-  height: 20px;
-  margin: 8px auto 0;
-  background: transparent;
-  cursor: pointer;
-  touch-action: none;
-}
-.archive-scrollbar::before, .archive-scrollbar .swiper-scrollbar-drag::before {
-  position: absolute;
-  inset: 7px 0;
-  border-radius: 999px;
-  background: #dfd4c2;
-  content: '';
-}
-.archive-scrollbar .swiper-scrollbar-drag {
-  background: transparent;
-  cursor: grab;
-}
-.archive-scrollbar .swiper-scrollbar-drag::before { background: #977449; }
-.archive-scrollbar .swiper-scrollbar-drag:active { cursor: grabbing; }
-.archive-carousel button {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 1px solid var(--paper-edge);
-  background: var(--pale);
-  cursor: zoom-in;
-}
-.archive-carousel button:focus-visible { outline-offset: 1px; }
-.archive-carousel img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-.archive-carousel .archive-portrait {
-  width: calc(50% * var(--portrait-ratio));
-}
-.archive-carousel .archive-portrait img {
-  aspect-ratio: var(--portrait-ratio);
-  object-fit: contain;
-}
-@media (prefers-reduced-motion: reduce) {
-  .archive-carousel figure, .archive-stage > button { transition: none; }
-}
-
 body:has(#photo-dialog[open]) { overflow: hidden; }
 #photo-dialog {
   position: fixed;

@@ -1,0 +1,88 @@
+.building-highlights { background: #fff; }
+.highlight-viewport { width: 100%; overflow: hidden; touch-action: pan-y; cursor: grab; }
+.highlight-viewport:active { cursor: grabbing; }
+.highlight-track { position: relative; display: flex; gap: 24px; padding: 12px 0 22px; transition: transform 820ms cubic-bezier(.22,.8,.22,1); }
+.highlight-card { position: relative; display: flex; flex-direction: column; flex: 0 0 min(720px,76vw); min-width: 0; min-height: 510px; border: 1px solid #e8e8ed; border-radius: 30px; overflow: hidden; background: #fff; opacity: .5; transform: scale(.96); transition: opacity 650ms, transform 820ms cubic-bezier(.22,.8,.22,1); user-select: none; }
+.highlight-card.active { opacity: 1; transform: scale(1); }
+.highlight-card:focus-visible { outline-offset: -5px; }
+.highlight-copy { padding: 32px 32px 24px; text-align: center; }
+.highlight-copy h3 { display: flex; justify-content: center; align-items: center; gap: 14px; font-size: 23px; font-weight: 600; line-height: 1.35; margin: 0 0 12px; color: var(--navy); }
+.highlight-copy h3 span { flex: none; }
+.highlight-copy p { font-size: 14px; line-height: 1.8; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.highlight-art { position: relative; flex: 1; min-height: 330px; overflow: hidden; display: grid; place-items: center; background: #fff; }
+.highlight-art > img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; transform: translateY(18px) scale(1.04); transition: transform 1.25s cubic-bezier(.2,.7,.2,1); pointer-events: none; }
+.highlight-card.active .highlight-art > img { transform: translateY(0) scale(1); }
+.highlight-glint { position: absolute; width: 60%; height: 100%; top: 0; left: -80%; background: linear-gradient(110deg,transparent,#ffffff85,transparent); transform: skewX(-18deg); pointer-events: none; opacity: 0; }
+.highlight-card.active .highlight-glint { animation: building-shine 2.6s ease .35s both; }
+@keyframes building-shine { 15%,90% { opacity: 1; } 100% { left: 130%; opacity: 0; } }
+.highlight-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 10px 0 21px; }
+.highlight-pagination { display: flex; align-items: center; flex: 0 1 auto; min-width: 0; max-width: 55%; height: 48px; gap: 4px; padding: 0 16px; border-radius: 40px; background: #e8e8ed; overflow-x: auto; scrollbar-width: none; }
+.highlight-pagination::-webkit-scrollbar { display: none; }
+.highlight-dot { flex: none; width: 24px; height: 40px; padding: 0; border: 0; background: transparent; display: grid; place-items: center; transition: width .4s; }
+.highlight-dot::before { content: ''; width: 7px; height: 7px; border-radius: 9px; background: #929297; transition: width .45s, background .45s; }
+.highlight-dot[aria-current="true"] { width: 39px; }
+.highlight-dot[aria-current="true"]::before { width: 29px; background: #303033; }
+.highlight-dot:focus-visible { outline-offset: -3px; border-radius: 12px; }
+.highlight-arrow, .highlight-play { flex: none; border: 0; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: #e8e8ed; color: #1d1d1f; font-size: 24px; }
+.highlight-play { font-size: 15px; }
+.highlight-play:hover, .highlight-arrow:hover { background: #dedee5; }
+.highlight-hint { text-align: center; color: var(--muted); font-size: 12px; margin: 0; }
+.highlight-count { font-variant-numeric: tabular-nums; }
+.highlight-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+@media(max-width:600px) {
+  .highlight-track { gap: 14px; padding-top: 0; }
+  .highlight-card { flex-basis: 78vw; min-height: 480px; border-radius: 26px; }
+  .highlight-copy { padding: 28px 20px 20px; }
+  .highlight-copy h3 { font-size: 19px; }
+  .highlight-copy p { font-size: 13px; }
+  .highlight-art { min-height: 290px; }
+  .highlight-controls { gap: 8px; margin-top: 3px; }
+  .highlight-pagination { height: 44px; max-width: 65%; padding-inline: 10px; }
+  .highlight-play, .highlight-arrow { width: 44px; height: 44px; }
+  .highlight-arrow { display: none; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .highlight-track, .highlight-card, .highlight-art > img, .highlight-dot, .highlight-dot::before { transition: none; }
+  .highlight-glint { animation: none !important; }
+}
+
+/* Home collection: soft neutral surface and white, generously rounded cards. */
+.collection-section.wrap:has(.building-highlights) {
+  width: 100%;
+  padding-inline: max(22px, calc((100% - 1160px) / 2));
+  background: #f5f5f7;
+}
+.collection-section .building-highlights { background: transparent; }
+.collection-section .highlight-card {
+  background: #fff;
+  border: 0;
+  border-radius: 28px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+}
+@media (max-width: 600px) {
+  .collection-section .highlight-card { border-radius: 24px; }
+}
+
+/* Inset artwork: the image sits inside the white card, with its title below. */
+.collection-section .highlight-card {
+  min-height: 0;
+  padding: 18px;
+  border: 1px solid #e5e5e7;
+}
+.collection-section .highlight-art {
+  order: -1;
+  flex: none;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 5 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.collection-section .highlight-copy { padding: 26px 12px 12px; }
+.collection-section .highlight-copy h3 { margin: 0; }
+.collection-section .highlight-copy p { display: none; }
+@media (max-width: 600px) {
+  .collection-section .highlight-card { padding: 12px; }
+  .collection-section .highlight-art { border-radius: 14px; }
+  .collection-section .highlight-copy { padding: 23px 8px 13px; }
+}

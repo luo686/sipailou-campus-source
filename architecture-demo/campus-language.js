@@ -2,6 +2,13 @@
 
 const CampusLanguage = (() => {
   const strings = {
+    welcomeLineOne: ['在四牌楼，', 'At Sipailou,'],
+    welcomeLineTwo: ['读懂一座校园', 'discover a campus.'],
+    watercolorDescription: ['从一座建筑，走进校园的历史与日常。', 'Discover campus life and history, one building at a time.'],
+    watercolorAlt: ['大礼堂与喷泉的淡水彩线描', 'A watercolor drawing of the Grand Auditorium and fountain'],
+    watercolorCaption: ['大礼堂 · 四牌楼', 'Grand Auditorium · Sipailou'],
+    enter3d: ['进入 3D 视图', 'Explore in 3D'],
+    enterHall3d: ['进入大礼堂 3D 交互视图', 'Open the interactive 3D view of the Grand Auditorium'],
     site: ['四牌楼校园导览', 'Sipailou Campus Guide'],
     affiliation: ['东南大学 · 南京', 'Southeast University · Nanjing'],
     campusAffiliation: ['东南大学 · 四牌楼校区', 'Southeast University · Sipailou Campus'],
@@ -100,15 +107,25 @@ const CampusLanguage = (() => {
     element.title = t(element.dataset.i18nTitle);
   });
 
+  let languageChangePending = false;
+  document.querySelectorAll('.translation-toggle').forEach(control => { control.dataset.language = language; });
   document.querySelectorAll('[data-campus-language]').forEach(button => {
     const target = button.dataset.campusLanguage;
     button.setAttribute('aria-pressed', String(target === language));
     button.addEventListener('click', () => {
-      if (target === language) return;
+      if (target === language || languageChangePending) return;
+      languageChangePending = true;
+      const control = button.closest('.translation-toggle');
+      if (control) {
+        control.dataset.language = target;
+        control.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      }
       try { localStorage.setItem(storageKey, target); } catch {}
       const url = new URL(location.href);
       url.searchParams.set('lang', target);
-      location.replace(url.href);
+      if (control && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setTimeout(() => location.replace(url.href), 240);
+      } else location.replace(url.href);
     });
   });
 

@@ -17,49 +17,34 @@ function galleryNavigation(element) {
   };
 }
 
+function archivePhotos(building) {
+  const photos = [...(building.gallery || [])];
+  if (building.photo && !photos.some(item => item.photo === building.photo)) {
+    photos.push({ photo: building.photo, caption: building.photoCaption || building.name, credit: building.photoCredit });
+  }
+  return photos;
+}
+
 function archiveGallery(building) {
-  if (!building.gallery?.length) return '';
-  return `<div class="archive-gallery">
-    <h3>${esc(t('gallery'))}</h3>
-    <div class="archive-stage">
-      <div class="swiper archive-carousel"><div class="swiper-wrapper">
-      ${building.gallery.map(({ photo, caption, portraitRatio }, index) => `<figure class="swiper-slide${portraitRatio ? ' archive-portrait' : ''}"${portraitRatio ? ` style="--portrait-ratio: ${portraitRatio}"` : ''}>
-        <button type="button" data-gallery-photo="${index}" aria-label="${esc(t('photoOf', { name: caption }))}">
-          <img src="${imageUrl(photo)}" alt="${esc(caption)}" loading="lazy" draggable="false">
-        </button>
-      </figure>`).join('')}
-      </div></div>
-      ${building.gallery.length > 1 ? galleryControls() : ''}
+  if (!archivePhotos(building).length) return '';
+  const instructions = isEnglish
+    ? 'Drag in any direction, or use the arrow keys. Press Enter to open the center photo.'
+    : '可向任意方向拖动，或使用方向键浏览。按回车放大中央照片。';
+  return `<section class="archive-gallery" aria-labelledby="archive-gallery-title">
+    <div class="archive-canvas" tabindex="0" role="region" aria-labelledby="archive-gallery-title" aria-describedby="archive-gallery-instructions">
+      <div class="archive-tiles"></div>
     </div>
-    ${building.gallery.length > 1 ? '<div class="swiper-scrollbar archive-scrollbar"></div>' : ''}
-  </div>`;
+    <span class="archive-instructions" id="archive-gallery-instructions">${instructions}</span>
+    <div class="archive-label">
+      <h3 id="archive-gallery-title">${esc(t('gallery'))}</h3>
+    </div>
+  </section>`;
 }
 
 function mountArchiveGallery(building, app) {
   const gallery = app.querySelector('.archive-gallery');
+  if (gallery) mountArchiveCanvas(gallery, building.name, archivePhotos(building));
   const photos = building.gallery || [];
-  if (gallery) {
-    new Swiper(gallery.querySelector('.archive-carousel'), {
-      slidesPerView: 'auto',
-      centeredSlides: true,
-      spaceBetween: 12,
-      breakpoints: { 641: { spaceBetween: 18 } },
-      grabCursor: true,
-      speed: galleryMotion.matches ? 0 : 400,
-      navigation: galleryNavigation(gallery),
-      scrollbar: {
-        el: gallery.querySelector('.archive-scrollbar'),
-        draggable: true,
-        hide: false,
-        snapOnRelease: false
-      },
-      a11y: { prevSlideMessage: t('previousPhoto'), nextSlideMessage: t('nextPhoto') }
-    });
-    for (const button of gallery.querySelectorAll('[data-gallery-photo]')) {
-      button.onclick = () => openPhotoGallery(building.name, photos, Number(button.dataset.galleryPhoto));
-    }
-  }
-
   if (!building.photo) return;
   const cover = { photo: building.photo, caption: building.photoCaption, credit: building.photoCredit };
   const coverIndex = photos.findIndex(photo => photo.photo === cover.photo);

@@ -6,150 +6,20 @@ const imageUrl=s=>/^(\.\.?\/|data:image\/(png|jpeg|webp);base64,|https?:\/\/)/i.
 const sourceUrl=s=>/^https?:\/\//i.test(s||'')?esc(s):'#';
 const app=document.getElementById('app');
 const buildingLink=b=>'#building/'+encodeURIComponent(b.id);
-const coverImage = b => b.photo ? `<img src="${imageUrl(b.photo)}" alt="${esc(b.name)}" loading="lazy">` : `<span class="photo-placeholder">${esc(t("photoUnavailable"))}</span>`;
+const coverImage = b => b.photo ? `<img ${CampusMedia.attributes(b.photo)} alt="${esc(b.name)}" loading="lazy" decoding="async">` : `<span class="photo-placeholder">${esc(t("photoUnavailable"))}</span>`;
 const cards=items=>items.map(b=>`<a class="building-card" href="${buildingLink(b)}"><div class="card-photo">${coverImage(b.cover ? {...b, photo: b.cover} : b)}</div><div class="card-copy"><h3>${esc(b.name)}<span aria-hidden="true">${siteIcon("arrow-right", 18)}</span></h3><p>${esc(b.summary||b.intro)}</p></div></a>`).join('');
-const buildingCount = count => t(count === 1 ? 'countOne' : 'countMany', { count });
 function crumb(name){return `<div class="breadcrumbs wrap"><a href="#home">${esc(t("home"))}</a><span>/</span>${name?'<a href="#buildings">'+esc(t('buildings'))+'</a><span>/</span><span>'+esc(name)+'</span>':'<span>'+esc(t('buildings'))+'</span>'}</div>`}
 
 function renderDirectory() {
-  app.innerHTML = crumb() + `
-    <section class="directory-head wrap">
-      <p class="section-kicker">${esc(t("guide"))}</p>
-      <h1>${esc(t("buildings"))}</h1>
-      <p>${esc(t("directoryDescription"))}</p>
-      <form class="building-search" role="search">
-        <div class="search-box">
-          ${siteIcon("search", 20)}
-          <input id="building-search" type="search" role="combobox" placeholder="${esc(t("searchPlaceholder"))}"
-            aria-label="${esc(t("searchPlaceholder"))}" aria-autocomplete="list" aria-expanded="false"
-            aria-controls="building-suggestions" autocomplete="off" enterkeyhint="search">
-          <button id="clear-building-search" type="button" aria-label="${esc(t("clearSearch"))}"
-            title="${esc(t("clearSearch"))}" disabled>${siteIcon("x", 20)}</button>
-          <button type="submit">${esc(t("search"))}</button>
-        </div>
-        <ul id="building-suggestions" class="building-suggestions" role="listbox" aria-label="${esc(t("suggestions"))}" hidden></ul>
-      </form>
-    </section>
-    <section class="wrap directory">
-      <p id="result-count" class="result-count" role="status">${esc(buildingCount(buildings.length))}</p>
-      <div class="building-grid" id="building-results">${cards(buildings)}</div>
-    </section>`;
+  app.innerHTML = '<section class="building-rack" aria-labelledby="building-rack-title"></section>';
+  mountBuildingRack(app.querySelector('.building-rack'), buildings, { isEnglish, buildingLink });
   document.title = t('buildings') + ' · ' + t('site');
-
-  const form = app.querySelector('.building-search');
-  const input = document.getElementById('building-search');
-  const clear = document.getElementById('clear-building-search');
-  const list = document.getElementById('building-suggestions');
-  const count = document.getElementById('result-count');
-  const results = document.getElementById('building-results');
-  let candidates = [];
-  let selected = -1;
-  let composing = false;
-  let hasSubmittedSearch = false;
-
-  function normalizePinyin(value) {
-    return value.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/[\s'’-]/g, '');
-  }
-
-  function matches(term) {
-    const query = term.trim().toLowerCase();
-    const pinyinQuery = normalizePinyin(query);
-    return buildings.filter(building => {
-      if ([building.name, building.originalName, building.en, building.legacyEnglish, ...(building.aliases || [])].some(name => (name || '').toLowerCase().includes(query))) return true;
-      if (!pinyinQuery || !building.pinyin) return false;
-      const syllables = building.pinyin.trim().split(/\s+/);
-      const initials = syllables.map(syllable => normalizePinyin(syllable).charAt(0)).join('');
-      return normalizePinyin(building.pinyin).includes(pinyinQuery) || initials.startsWith(pinyinQuery);
-    });
-  }
-
-  function closeSuggestions() {
-    list.hidden = true;
-    candidates = [];
-    selected = -1;
-    input.setAttribute('aria-expanded', 'false');
-    input.removeAttribute('aria-activedescendant');
-  }
-
-  function showSuggestions() {
-    closeSuggestions();
-    clear.disabled = input.value === "";
-    if (composing || !input.value.trim()) return;
-    candidates = matches(input.value).slice(0, 6);
-    if (!candidates.length) return;
-    list.innerHTML = candidates.map((building, index) => `
-      <li id="building-suggestion-${index}" role="option" aria-selected="false" data-index="${index}">
-        ${siteIcon("search", 16)}<span>${esc(building.name)}</span>
-      </li>`).join('');
-    list.hidden = false;
-    input.setAttribute('aria-expanded', 'true');
-  }
-
-  function showResults(candidate) {
-    if (candidate) input.value = candidate.name;
-    hasSubmittedSearch = Boolean(input.value.trim());
-    const filtered = candidate ? [candidate] : matches(input.value);
-    closeSuggestions();
-    count.textContent = buildingCount(filtered.length);
-    results.classList.add('search-results-enter');
-    results.innerHTML = filtered.length
-      ? cards(filtered)
-      : `<p class="empty">${esc(t("noResults"))}</p>`;
-  }
-
-  clear.addEventListener('click', () => {
-    input.value = '';
-    input.focus();
-    if (hasSubmittedSearch) showResults();
-    else closeSuggestions();
-    clear.disabled = true;
-  });
-  input.addEventListener('input', showSuggestions);
-  input.addEventListener('focus', showSuggestions);
-  input.addEventListener('compositionstart', () => {
-    composing = true;
-    closeSuggestions();
-  });
-  input.addEventListener('compositionend', () => {
-    composing = false;
-    showSuggestions();
-  });
-  input.addEventListener('keydown', event => {
-    if (composing || event.isComposing || event.keyCode === 229) return;
-    if (event.key === 'Escape' && !list.hidden) {
-      event.preventDefault();
-      closeSuggestions();
-      return;
-    }
-    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-    if (list.hidden) showSuggestions();
-    if (!candidates.length) return;
-    event.preventDefault();
-    if (selected < 0) selected = event.key === 'ArrowDown' ? 0 : candidates.length - 1;
-    else selected = (selected + (event.key === 'ArrowDown' ? 1 : -1) + candidates.length) % candidates.length;
-    Array.from(list.children).forEach((option, index) => {
-      option.setAttribute('aria-selected', String(index === selected));
-    });
-    input.setAttribute('aria-activedescendant', list.children[selected].id);
-  });
-  list.addEventListener('mousedown', event => event.preventDefault());
-  list.addEventListener('click', event => {
-    const option = event.target.closest('[data-index]');
-    if (option) showResults(candidates[Number(option.dataset.index)]);
-  });
-  form.addEventListener('focusout', event => {
-    if (!form.contains(event.relatedTarget)) closeSuggestions();
-  });
-  form.addEventListener('submit', event => {
-    event.preventDefault();
-    if (!composing) showResults(candidates[selected]);
-  });
 }
 
 function buildingMap(building) {
   const title = `<h2>${esc(t("mapLocation"))}</h2>`;
   if (!building.mapId) return title + `<p class="map-note">${esc(t("mapUnavailable"))}</p>`;
-  const url = 'map.html?building=' + encodeURIComponent(building.mapId) + '&lang=' + language + '&v=0.4';
+  const url = 'map.html?building=' + encodeURIComponent(building.mapId) + '&lang=' + language + '&v=1.0';
   return `<div class="map-heading">${title}<a class="inline-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(t("openMap"))} ${siteIcon("arrow-up-right")}</a></div>
     <p class="map-note">${esc(t("mapNote", { name: building.name }))}</p>
     <div class="map-panel"><iframe title="${esc(t("mapOf", { name: building.name }))}" src="${esc(url)}" loading="lazy"></iframe></div>`;
@@ -165,63 +35,29 @@ function relatedBuildings(currentId, limit = 3) {
   return candidates.slice(0, count);
 }
 
-function render(){if(photoDialog.open)photoDialog.close();app.querySelector('.archive-carousel')?.swiper?.destroy();const hash=location.hash||'#home';const nfcId=new URLSearchParams(location.search).get('building');if(nfcId&&!location.hash){location.hash='building/'+encodeURIComponent(nfcId);return}let id;try{id=decodeURIComponent(hash.replace('#building/',''))}catch{id=''}const b=buildings.find(x=>x.id===id);const isHome=hash==='#home';document.querySelectorAll('[data-nav]').forEach(a=>{const current=a.dataset.nav===(isHome?'home':'buildings');a.classList.toggle('active',current);if(current)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-if(isHome){const hall=buildings.find(x=>x.id==='hall')||buildings[0];app.innerHTML=`<section class="home-hero"><img src="${imageUrl(hall.photo)}" alt="${esc(t("heroAlt"))}"><div class="hero-shade"></div><div class="home-hero-copy wrap"><p class="overline">${esc(t("campusAffiliation"))}</p><h1>${esc(t("welcome"))}</h1><p class="hero-description">${esc(t("heroDescription"))}</p><a class="button light" href="#buildings">${esc(t("startVisit"))} ${siteIcon("arrow-right")}</a></div><a class="photo-place" href="${buildingLink(hall)}">${esc(t("featured", { name: hall.name }))} ${siteIcon("arrow-right", 14)}</a></section><section class="visit-options wrap" aria-label="${esc(t("explore"))}"><a href="#buildings" class="visit-option"><span class="option-icon">${siteIcon("building", 36)}</span><div><h2>${esc(t("guide"))}</h2><p>${esc(t("guideDescription"))}</p></div><span class="option-arrow">${siteIcon("arrow-right", 22)}</span></a><div class="visit-option game-option"><span class="option-icon">${siteIcon("puzzle", 36)}</span><div><h2>${esc(t("game"))} <small>${esc(t("comingSoon"))}</small></h2><p>${esc(t("gameDescription"))}</p></div></div></section><section class="collection-section wrap"><div class="section-heading"><div><p class="section-kicker">${esc(t("visit"))}</p><h2>${esc(t("getStarted"))}</h2></div><a class="inline-link" href="#buildings">${esc(t("allBuildings"))} ${siteIcon("arrow-right")}</a></div>${recommendationRail(relatedBuildings(undefined, buildings.length))}</section>`;document.title=t('site');}
+function render(){if(location.hash==='#history')history.replaceState(history.state,'','#home');app.querySelector('.alumni-room')?.dispose?.();app.querySelector('.hall-tour')?.dispose?.();app.querySelector('.building-rack')?.dispose?.();if(photoDialog.open)photoDialog.close();app.querySelector('.archive-gallery')?.dispose?.();const hash=location.hash||'#home';const nfcId=new URLSearchParams(location.search).get('building');if(nfcId&&!location.hash){location.hash='building/'+encodeURIComponent(nfcId);return}let id;try{id=decodeURIComponent(hash.replace('#building/',''))}catch{id=''}const b=buildings.find(x=>x.id===id);const isHome=hash==='#home';document.querySelectorAll('[data-nav]').forEach(a=>{const current=a.dataset.nav===(isHome?'home':hash==='#buildings'||b?'buildings':'');a.classList.toggle('active',current);if(current)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+if(isHome){const hall=buildings.find(x=>x.id==='hall')||buildings[0];app.innerHTML=`<section class="home-hero watercolor-welcome" aria-labelledby="welcome-title"><div class="home-hero-copy wrap"><p class="overline">${esc(t("campusAffiliation"))}</p><h1 id="welcome-title">${esc(t("welcomeLineOne"))}<br>${esc(t("welcomeLineTwo"))}</h1><p class="hero-description">${esc(t("watercolorDescription"))}</p><a class="button light" href="#buildings">${esc(t("startVisit"))} ${siteIcon("arrow-right")}</a></div><figure class="welcome-art"><img ${CampusMedia.attributes('assets/hall-watercolor.png','(max-width:720px) 100vw, 760px')} alt="${esc(t("watercolorAlt"))}" width="1536" height="1024" fetchpriority="high"><figcaption><a class="welcome-caption" href="${buildingLink(hall)}">${esc(t("watercolorCaption"))}</a></figcaption><a class="welcome-3d" href="seu_hall_3d_demo0.6.html" aria-label="${esc(t("enterHall3d"))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9M8 5.25l8 4.5"/></svg><span>${esc(t("enter3d"))}</span><span class="welcome-3d-arrow" aria-hidden="true">↗</span></a></figure></section><section class="card-stack" data-card-stack aria-label="${isEnglish ? 'Featured cards' : '精选卡片'}"></section><section class="collection-section wrap"><div class="section-heading"><div><p class="section-kicker">${esc(t("visit"))}</p><h2>${esc(t("getStarted"))}</h2></div><a class="inline-link" href="#buildings">${esc(t("allBuildings"))} ${siteIcon("arrow-right")}</a></div>${buildingHighlights(relatedBuildings(undefined, buildings.length))}</section><section class="discovery-module" aria-label="${isEnglish ? 'Campus image collection' : '校园图片集'}"><div class="discovery-spacer" aria-hidden="true"></div><div class="discovery-viewport" tabindex="0" aria-label="${isEnglish ? 'Swipe horizontally to browse images' : '左右滑动浏览图片'}"><div class="discovery-board"></div></div></section><section class="campus-adventure" aria-label="${isEnglish ? 'Campus adventure — game coming soon' : '校园探索 · 游戏区域预留'}"><div class="campus-adventure-art"><img ${CampusMedia.attributes('assets/campus-adventure.png','(max-width:720px) 100vw, 900px')} width="1129" height="1393" loading="lazy" decoding="async" alt="${isEnglish ? 'Embark on a campus adventure. Find clues, explore Sipailou and discover campus history and daily life. More ways to play. The central game area and five activity capsules are reserved.' : '开启一场校园探索。寻找校园线索，探索四牌楼，发现校园里的历史与日常。More ways to play。中央游戏区和五个玩法胶囊暂留空。'}"><div class="campus-adventure-game-slot" id="campus-adventure-game-slot"></div></div></section>`;document.title=t('site');}
 else if(hash==='#buildings'){renderDirectory()}
-else if(b){document.title=b.name+' · '+t('site');app.innerHTML=crumb(b.name)+`<section class="building-hero${b.id === "hall" ? " tall-cover" : ""}${b.photo ? "" : " no-photo"}">${b.photo ? `<button id="view-photo" aria-label="${esc(t("photoOf", { name: b.name }))}"><img src="${imageUrl(b.photo)}" alt="${esc(b.photoCaption)}"></button>` : ""}<div class="hero-shade"></div><div class="building-hero-copy wrap"><p class="overline">${esc(t("campus"))}${b.number ? `<span class="hero-folio">${esc(t("folio", { number: b.number }))}</span>` : ''}</p><h1>${esc(b.name)}</h1>${!isEnglish && b.en?`<p class="building-english" lang="en">${esc(b.en)}</p>`:''}</div>${b.photo ? `<button class="enlarge-button" id="enlarge-photo" aria-label="${esc(t("enlargePhoto"))}">${esc(t("viewPhoto"))} ${siteIcon("maximize", 14)}</button>` : ""}</section><div class="detail-tabs"><nav class="wrap" aria-label="${esc(t("detailNavigation"))}"><a href="#overview" data-scroll="overview" class="current">${esc(t("overview"))}</a><a href="#stories" data-scroll="stories">${esc(t("history"))}</a><a href="#location" data-scroll="location">${esc(t("mapLocation"))}</a></nav></div><div class="detail-layout wrap"><div class="detail-main"><section id="overview" class="article-section"><h2>${esc(t("overview"))}</h2><p class="lead">${esc(b.intro)}</p></section><section id="stories" class="article-section"><h2>${esc(t("history"))}</h2>${b.sections.map(s=>`<article><h3>${esc(s.title)}</h3><p>${esc(s.body)}</p></article>`).join('')}${archiveGallery(b)}</section><section id="location" class="article-section">${buildingMap(b)}</section>${b.sources?.length?`<section class="article-section sources"><h2>${esc(t("references"))}</h2>${b.sources.filter(s=>s.title&&s.url).map(s=>`<a href="${sourceUrl(s.url)}" target="_blank" rel="noopener">${esc(s.title)} <span>${siteIcon("arrow-up-right", 14)}</span></a>`).join('')}</section>`:''}</div><aside class="detail-aside"><div class="fact-sheet"><h2>${esc(t("facts"))}</h2><dl>${b.facts.map(f=>`<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`).join('')}</dl></div>${b.photo ? `<div class="aside-photo">${coverImage(b)}<p>${esc(b.photoCaption)}${b.photoCredit ? `<br>${esc(b.photoCredit)}` : ""}</p></div>` : ""}</aside></div><section class="related wrap"><div class="section-heading"><h2>${esc(t("keepExploring"))}</h2><a class="inline-link" href="#buildings">${esc(t("allBuildings"))} ${siteIcon("arrow-right")}</a></div>${recommendationRail(relatedBuildings(b.id))}<a class="return-link" href="#buildings">${siteIcon("arrow-left")} ${esc(t("returnToBuildings"))}</a></section>`;
+else if(hash==='#alumni'){renderAlumni()}
+else if(hash.startsWith('#alumni/')){
+  const person = alumniPeople.find(item => alumniLink(item) === hash);
+  if (person) renderAlumniProfile(person);
+  else renderAlumni();
+}
+else if (hash === '#game') {
+  const title = isEnglish ? 'Game' : '游戏';
+  document.title = title + ' · ' + t('site');
+  app.innerHTML = `<div class="breadcrumbs wrap"><a href="#home">${esc(t('home'))}</a><span>/</span><span>${title}</span></div><section class="column-placeholder wrap"><p class="section-kicker">${esc(t('site'))}</p><h1>${title}</h1><p>${isEnglish ? 'Content is being prepared. Please check back soon.' : '内容筹备中，敬请期待。'}</p><a class="inline-link" href="#home">${siteIcon('arrow-left')} ${isEnglish ? 'Back to home' : '返回首页'}</a></section>`;
+}
+else if(b){document.title=b.name+' · '+t('site');app.innerHTML=crumb(b.name)+hallTourMarkup(b)+`<div class="detail-tabs"><nav class="wrap" aria-label="${esc(t("detailNavigation"))}"><a href="#overview" data-scroll="overview" class="current">${esc(t("overview"))}</a><a href="#stories" data-scroll="stories">${esc(t("history"))}</a><a href="#location" data-scroll="location">${esc(t("mapLocation"))}</a></nav></div><div class="detail-layout wrap"><div class="detail-main"><section id="overview" class="article-section"><h2>${esc(t("overview"))}</h2><p class="lead">${esc(b.intro)}</p></section><section id="stories" class="article-section"><h2>${esc(t("history"))}</h2>${b.sections.map(s=>`<article><h3>${esc(s.title)}</h3><p>${esc(s.body)}</p></article>`).join('')}${archiveGallery(b)}</section><section id="location" class="article-section">${buildingMap(b)}</section>${b.sources?.length?`<section class="article-section sources"><h2>${esc(t("references"))}</h2>${b.sources.filter(s=>s.title&&s.url).map(s=>`<a href="${sourceUrl(s.url)}" target="_blank" rel="noopener">${esc(s.title)} <span>${siteIcon("arrow-up-right", 14)}</span></a>`).join('')}</section>`:''}</div><aside class="detail-aside"><div class="fact-sheet"><h2>${esc(t("facts"))}</h2><dl>${b.facts.map(f=>`<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`).join('')}</dl></div>${b.photo ? `<div class="aside-photo">${coverImage(b)}<p>${esc(b.photoCaption)}${b.photoCredit ? `<br>${esc(b.photoCredit)}` : ""}</p></div>` : ""}</aside></div>${buildingRecommendationGallery(relatedBuildings(b.id, 7))}`;
+mountHallTour(app.querySelector(".hall-tour"));
 mountArchiveGallery(b, app);
 document.querySelectorAll('[data-scroll]').forEach(a=>a.onclick=ev=>{ev.preventDefault();document.getElementById(a.dataset.scroll).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.querySelectorAll('.detail-tabs a').forEach(t=>t.classList.toggle('current',t.dataset.scroll===a.dataset.scroll))});}
 else{document.title=t('notFound')+' · '+t('site');app.innerHTML=`<section class="wrap directory-head"><h1>${esc(t("notFound"))}</h1><a class="inline-link" href="#buildings">${siteIcon("arrow-left")} ${esc(t("returnToBuildings"))}</a></section>`}window.scrollTo({top:0,behavior:'instant'});app.dispatchEvent(new Event('campus:render'))}
-function recommendationRail(items) {
-  const previous = isEnglish ? 'Previous building' : '上一座建筑';
-  const next = isEnglish ? 'Next building' : '下一座建筑';
-  return `<div class="recommendation-rail">
-    <div class="recommendation-track" tabindex="0" aria-label="${isEnglish ? 'Recommended buildings' : '推荐建筑'}">${cards(items)}</div>
-    <div class="recommendation-controls">
-      <button type="button" data-step="-1" aria-label="${previous}">${siteIcon('arrow-left', 18)}</button>
-      <button type="button" data-step="1" aria-label="${next}">${siteIcon('arrow-right', 18)}</button>
-    </div>
-  </div>`;
+function buildingHighlights(items) {
+  return `<div class="building-highlights"><div class="highlight-viewport" tabindex="0" role="region" aria-roledescription="${isEnglish ? 'carousel' : '轮播'}" aria-label="${isEnglish ? 'Recommended buildings. Use arrow keys to browse.' : '推荐建筑，使用左右方向键切换'}"><div class="highlight-track">${items.map(b => `<a class="highlight-card" href="${buildingLink(b)}"><div class="highlight-copy"><h3>${esc(b.name)}<span aria-hidden="true">${siteIcon('arrow-up-right', 20)}</span></h3><p>${esc(b.summary || b.intro)}</p></div><div class="highlight-art">${coverImage(b.cover ? {...b, photo: b.cover} : b)}<span class="highlight-glint" aria-hidden="true"></span></div></a>`).join('')}</div></div><div class="highlight-controls"><button type="button" class="highlight-arrow" data-direction="-1" aria-label="${isEnglish ? 'Previous building' : '上一座建筑'}">‹</button><div class="highlight-pagination" aria-label="${isEnglish ? 'Choose a building' : '选择建筑'}"></div><button type="button" class="highlight-play" aria-pressed="false"></button><button type="button" class="highlight-arrow" data-direction="1" aria-label="${isEnglish ? 'Next building' : '下一座建筑'}">›</button></div><p class="highlight-hint"><span class="highlight-count"></span> · ${isEnglish ? 'Swipe to browse · Click to explore' : '左右滑动切换 · 点击卡片进入'}</p><span class="highlight-status" aria-live="polite"></span></div>`;
 }
 
-function mountRecommendationRail() {
-  const rail = app.querySelector('.recommendation-rail');
-  if (!rail) return;
-  const track = rail.querySelector('.recommendation-track');
-  const slides = [...track.querySelectorAll('.building-card')];
-  const buttons = [...rail.querySelectorAll('[data-step]')];
-  let active = 0;
-  const select = index => {
-    active = (index + slides.length) % slides.length;
-    slides.forEach((slide, i) => {
-      const offset = (i - active + slides.length) % slides.length;
-      slide.dataset.position = offset === 0 ? 'front'
-        : offset === 1 ? 'right'
-        : offset === slides.length - 1 ? 'left' : 'behind';
-      slide.setAttribute('aria-hidden', String(slide.dataset.position === 'behind'));
-      slide.tabIndex = i === active ? 0 : -1;
-    });
-  };
-  slides.forEach((slide, i) => {
-    slide.onclick = event => {
-      if (i === active) return;
-      event.preventDefault();
-      select(i);
-      slides[i].focus({ preventScroll: true });
-    };
-  });
-  for (const button of buttons) {
-    button.disabled = slides.length < 2;
-    button.onclick = () => select(active + Number(button.dataset.step));
-  }
-  track.addEventListener('keydown', event => {
-    if (!['ArrowLeft', 'ArrowRight'].includes(event.key) || slides.length < 2) return;
-    event.preventDefault();
-    select(active + (event.key === 'ArrowRight' ? 1 : -1));
-    slides[active].focus({ preventScroll: true });
-  });
-  if (slides.length) select(0);
-}
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let routeFade;
 let sectionObserver;
@@ -229,14 +65,14 @@ let sectionObserver;
 function showRoute() {
   sectionObserver?.disconnect();
   render();
-  mountRecommendationRail();
-  if (reducedMotion.matches) return;
+  mountBuildingRecommendationGallery();
+  if (reducedMotion.matches || location.hash === '#buildings') return;
 
   const blocks = app.querySelectorAll([
     '.breadcrumbs', '.home-hero', '.visit-option', '.section-heading',
-    '.directory-head', '.directory .building-card', '.building-hero',
+    '.directory-head', '.building-hero',
     '.detail-tabs', '.fact-sheet', '.aside-photo', '.article-section',
-    '.recommendation-rail', '.return-link'
+    '.recommendation-gallery', '.return-link'
   ].join(','));
   const reveal = (block, index) => {
     block.animate([{ opacity: 0 }, { opacity: 1 }], {
