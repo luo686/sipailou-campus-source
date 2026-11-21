@@ -1,35 +1,15 @@
 'use strict';
 
-const tourScripts = new Map();
-function loadTourScript(file) {
-  if (!tourScripts.has(file)) {
+let hallRuntime;
+function loadHallRuntime() {
+  if (typeof HallThree !== 'undefined' && typeof buildHall === 'function') return Promise.resolve();
+  return hallRuntime ||= Promise.all(['hall-three.min.js', 'hall-model.js'].map(file => new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    const ready = new Promise((resolve, reject) => {
-      script.src = 'assets/' + file;
-      script.onload = resolve;
-      script.onerror = () => {
-        script.remove();
-        tourScripts.delete(file);
-        reject(new Error(file));
-      };
-    });
-    tourScripts.set(file, ready);
+    script.src = 'assets/' + file;
+    script.onload = resolve;
+    script.onerror = () => { script.remove(); reject(new Error(file)); };
     document.head.append(script);
-  }
-  return tourScripts.get(file);
-}
-
-async function loadHallRuntime(isHall) {
-  const scripts = [];
-  if (typeof Hall3DVendor === 'undefined') scripts.push(loadTourScript('hall-3d-vendor.js?v=169'));
-  if (isHall) {
-    if (typeof buildHall !== 'function') scripts.push(loadTourScript('hall-model.js?v=3'));
-  } else {
-    if (typeof makeExistingCampusModel !== 'function') scripts.push(loadTourScript('campus-existing-models.js?v=1'));
-    if (typeof makeCampusBuilding !== 'function') scripts.push(loadTourScript('campus-building-models.js?v=1'));
-  }
-  await Promise.all(scripts);
-  return Hall3DVendor.THREE;
+  }))).catch(error => { hallRuntime = undefined; throw error; });
 }
 
 function hallTourMarkup(building) {
@@ -96,48 +76,36 @@ function mountHallTour(tour) {
     { at: 0, eye: [3, 11, 57], center: [0, 6.2, 3] },
     { at: .32, eye: [4, 9.2, 36], center: [0, 7.3, -2] },
     { at: .66, eye: [34, 12.4, 20], center: [0, 7.8, -5] },
-    { at: 1, eye: [24, 30, 20], center: [0, 7.4, -3] },
+    { at: 1, eye: [24, 30, 20], center: [0, 11, -6] },
   ] : [
     { at: 0, eye: [2, 9, 55], center: [0, 5.4, 0] },
     { at: .5, eye: [12, 10, 37], center: [0, 5.6, 0] },
     { at: 1, eye: [32, 22, 31], center: [0, 5.6, 0] },
   ];
-  function initModel(THREE) {
+  function initModel() {
     let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new HallThree.WebGLRenderer({ antialias: true, alpha: false });
     } catch {
       return null;
     }
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = HallThree.PCFSoftShadowMap;
     renderer.shadowMap.autoUpdate = false;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = HallThree.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#e6e3d6');
-    scene.fog = new THREE.Fog('#e6e3d6', 55, 105);
-    if (isHall) buildHall(scene, THREE);
-    else {
-      const size = buildCampusMassing(scene, buildingId, THREE, () => {
-        if (!signal.aborted) queueRender();
-      });
-      if (size) {
-        const center = size.y * .43;
-        const depth = size.z / 2;
-        views[0].eye = [2, center+5, 45+depth];
-        views[1].eye = [12, center+6, 34+depth*.68];
-        views[2].eye = [32, center+15, 29+depth*.55];
-        views.forEach(view => { view.center = [0, center, 0]; });
-      }
-    }
-    const path = new THREE.CatmullRomCurve3(views.map(view => new THREE.Vector3(...view.eye)));
-    const target = new THREE.CatmullRomCurve3(views.map(view => new THREE.Vector3(...view.center)));
-    const camera = new THREE.PerspectiveCamera(39, 1, .1, 200);
+    const scene = new HallThree.Scene();
+    scene.background = new HallThree.Color('#e6e3d6');
+    scene.fog = new HallThree.Fog('#e6e3d6', 55, 105);
+    if (isHall) buildHall(scene);
+    else buildCampusMassing(scene, buildingId);
+    const path = new HallThree.CatmullRomCurve3(views.map(view => new HallThree.Vector3(...view.eye)));
+    const target = new HallThree.CatmullRomCurve3(views.map(view => new HallThree.Vector3(...view.center)));
+    const camera = new HallThree.PerspectiveCamera(39, 1, .1, 200);
     renderer.domElement.setAttribute('aria-hidden', 'true');
     model.append(renderer.domElement);
-    return { THREE, renderer, scene, camera, path, target, focus: new THREE.Vector3() };
+    return { renderer, scene, camera, path, target, focus: new HallThree.Vector3() };
   }
 
   let world;
@@ -215,7 +183,7 @@ function mountHallTour(tour) {
     updateCopy(progress, active);
     progressBar.style.transform = 'scaleX(' + progress + ')';
     if (!world || tour.getBoundingClientRect().bottom < 0) return;
-    const { THREE, renderer, scene, camera, path, target, focus } = world;
+    const { renderer, scene, camera, path, target, focus } = world;
     const width = model.clientWidth;
     const height = model.clientHeight;
     if (!width || !height) return;
@@ -225,7 +193,7 @@ function mountHallTour(tour) {
       lastHeight = height;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      camera.fov = mobile ? Math.max(43, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(24)) / camera.aspect))) : 38;
+      camera.fov = mobile ? Math.max(43, HallThree.MathUtils.radToDeg(2 * Math.atan(Math.tan(HallThree.MathUtils.degToRad(24)) / camera.aspect))) : 38;
       camera.updateProjectionMatrix();
       renderer.shadowMap.needsUpdate = true;
     }
@@ -251,9 +219,9 @@ function mountHallTour(tour) {
   motion.addEventListener('change', queueRender, { signal });
   motion.addEventListener('change', syncArchiveMotion, { signal });
   syncArchiveMotion();
-  loadHallRuntime(isHall).then(THREE => {
+  loadHallRuntime().then(() => {
     if (signal.aborted) return;
-    world = initModel(THREE);
+    world = initModel();
     if (!world) tour.classList.add('tour-without-model');
     queueRender();
   }).catch(() => { if (!signal.aborted) tour.classList.add('tour-without-model'); });
@@ -266,7 +234,6 @@ function mountHallTour(tour) {
     const { scene, renderer } = world;
     scene.traverse(object => {
       object.geometry?.dispose();
-      object.material?.map?.dispose();
       object.material?.dispose();
       object.shadow?.dispose();
     });

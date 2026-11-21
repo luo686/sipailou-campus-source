@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>校园建筑 · 卡架预览</title>
+<link rel="stylesheet" href="assets/building-rack.css?v=1.4">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body:has(.building-rack) {
+    display: block;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+  }
+  .building-rack { height: 100dvh; }
+  .rack-screen { background: #fff; }
+  .rack-title { font-family: system-ui, sans-serif; }
+</style>
+<script src="published-buildings.js" defer></script>
+<script src="assets/building-rack.js?v=1.7" defer></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    mountBuildingRack(document.querySelector('.building-rack'), window.CAMPUS_PUBLISHED_BUILDINGS, {
+      isEnglish: false,
+      buildingLink: building => 'index.html?lang=zh-CN#building/' + encodeURIComponent(building.id),
+    });
+  });
+</script>
+</head>
+<body>
+<main class="building-rack" aria-labelledby="building-rack-title"></main>
+</body>
+</html>

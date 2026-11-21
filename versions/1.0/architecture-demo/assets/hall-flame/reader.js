@@ -5,12 +5,11 @@ function drawHallSheet(width,height,page,chapters,english,building,viewport){
 async function startBuildingReader(dialog, english, building){
   const chapters=[[english ? "Introduction" : "建筑介绍", building.intro], ...(building.sections || []).map(s=>[s.title,s.body])].filter(c=>c[1]);
   const canvas=dialog.querySelector('canvas'), hint=dialog.querySelector('footer span'), live=dialog.querySelector('p');
-  const skip=dialog.querySelector('.flame-skip');
-  skip.textContent=english?'Skip animation':'跳过动画';
   if(!dialog.open)return;
   const model=new PaperBurn(canvas.clientWidth,canvas.clientHeight);
   const end=chapters.length+1;
-  const maxBurnSeconds=1.25;
+  model.state.speed *= 2;
+  dialog.dataset.burnSpeed=String(model.state.speed);
   model.targetPage=()=>model.state.pageIndex+1;
   const gl=canvas.getContext('webgl',{alpha:true,antialias:false});
   const sheet=page=>drawHallSheet(canvas.width,canvas.height,page,chapters,english,building,{width:canvas.clientWidth,height:canvas.clientHeight,visibleHeight:dialog.clientHeight});
@@ -70,38 +69,18 @@ async function startBuildingReader(dialog, english, building){
     const description=page?chapters[page-1].join('。'):building.name;
     live.textContent=description;canvas.setAttribute('aria-label',description+' · '+hint.textContent);
   }
-  function finishPage(){
-    cancelAnimationFrame(raf);
-    raf=0;
-    last=0;
-    if(document.activeElement===skip)canvas.focus({preventScroll:true});
-    skip.hidden=true;
-    dialog.scrollTop=0;
-    status();
-    paint();
-  }
-  function skipBurn(){
-    if(model.advance(model.finishAt/model.state.speed+1))finishPage();
-  }
-  skip.onclick=skipBurn;
   function frame(now){
     if(!dialog.open)return;
-    const done=model.advance((now-last)/1000);
-    last=now;
-    if(done){finishPage();return;}
-    paint();
-    raf=requestAnimationFrame(frame);
+    const done=model.advance(last?Math.min((now-last)/1000,.12):0);last=now;
+    if(done){raf=0;last=0;if(model.state.pageIndex===end){dialog.close();return;}dialog.scrollTop=0;status();}
+    paint();if(!done)raf=requestAnimationFrame(frame);
   }
   function ignite(x,y){
     if(dialog.dataset.phase==='welcome')return;
-    if(model.state.phase==='burning'){skipBurn();return;}
     if(model.state.pageIndex===end-1){dialog.close();return;}
     model.ignite(x,y);
-    model.state.speed=model.finishAt/maxBurnSeconds;
-    if(!gl || reduced.matches){skipBurn();return;}
-    skip.hidden=false;
-    last=performance.now();
-    raf=requestAnimationFrame(frame);
+    if(!gl || reduced.matches){model.advance(model.finishAt/model.state.speed+1);if(model.state.pageIndex===end){dialog.close();return;}dialog.scrollTop=0;status();paint();return;}
+    if(!raf)raf=requestAnimationFrame(frame);
   }
   const point=e=>{const r=canvas.getBoundingClientRect();ignite((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);};
   if(dialog.classList.contains('manuscript-reader')){

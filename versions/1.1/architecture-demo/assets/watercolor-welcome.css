@@ -1,0 +1,111 @@
+/* Welcome-only styling keeps the other campus pages unchanged. */
+.home-hero.watercolor-welcome {
+  height: auto;
+  color: #292b29;
+  background: #fff;
+  padding: 64px 0 28px;
+}
+.watercolor-welcome .home-hero-copy {
+  width: min(760px, calc(100% - 64px));
+  padding: 0;
+}
+.watercolor-welcome .overline {
+  color: #747773;
+  font-size: 12px;
+  letter-spacing: .18em;
+  margin: 0 0 20px;
+}
+.watercolor-welcome h1 {
+  font-family: 'Songti SC', 'Noto Serif CJK SC', 'Source Han Serif SC', SimSun, serif;
+  font-size: clamp(36px, 4.1vw, 56px);
+  font-weight: 500;
+  line-height: 1.48;
+  letter-spacing: .025em;
+  margin: 0 0 18px;
+}
+.watercolor-welcome .hero-description {
+  color: #737570;
+  font-size: 15px;
+  line-height: 1.9;
+  margin: 0 0 26px;
+}
+.home-hero.watercolor-welcome .button.light {
+  min-height: 44px;
+  padding: 9px 20px;
+  border: 1px solid #5c635d;
+  border-radius: 999px;
+  color: #333b35;
+  background: #fff;
+  gap: 25px;
+  font-size: 13px;
+}
+.home-hero.watercolor-welcome .button.light:hover {
+  background: #f3f5f1;
+  border-color: #3c5144;
+}
+.watercolor-welcome .welcome-art {
+  position: relative;
+  width: min(900px, 100%);
+  margin: 28px auto 0;
+  padding-bottom: 0;
+}
+.watercolor-welcome .welcome-art > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  mix-blend-mode: multiply;
+}
+.watercolor-welcome figcaption {
+  text-align: left;
+  padding-inline: 30px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #737570;
+  letter-spacing: .08em;
+}
+.watercolor-welcome .welcome-caption {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.watercolor-welcome .welcome-caption:hover { color: #384d40; }
+.watercolor-welcome .welcome-3d {
+  position: absolute;
+  right: 30px;
+  bottom: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid #dce2d9;
+  border-radius: 999px;
+  background: #fff;
+  color: #586a5b;
+  font-size: 11px;
+  letter-spacing: .04em;
+  transition: border-color .18s, background .18s;
+}
+.watercolor-welcome .welcome-3d svg { width: 17px; height: 17px; }
+.watercolor-welcome .welcome-3d-arrow { margin-left: 4px; font-size: 14px; }
+.watercolor-welcome .welcome-3d:hover {
+  background: #f4f7f1;
+  border-color: #9dad9a;
+}
+@media (min-width: 960px) {
+  .watercolor-welcome .welcome-art { margin-top: -8px; }
+}
+@media (max-width: 600px) {
+  .home-hero.watercolor-welcome { padding: 34px 0 16px; }
+  .watercolor-welcome .home-hero-copy { width: calc(100% - 48px); }
+  .watercolor-welcome .overline { font-size: 10px; margin-bottom: 15px; }
+  .watercolor-welcome h1 { font-size: clamp(30px, 8.6vw, 43px); margin-bottom: 14px; }
+  .watercolor-welcome .hero-description { font-size: 12px; margin-bottom: 20px; }
+  .watercolor-welcome .welcome-art { margin-top: 26px; }
+  .watercolor-welcome figcaption { padding-inline: 24px; font-size: 10px; letter-spacing: 0; }
+  .watercolor-welcome .welcome-3d { right: 20px; bottom: 0; }
+  html:lang(en) .watercolor-welcome h1 { font-size: clamp(27px, 7.3vw, 38px); letter-spacing: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .watercolor-welcome .welcome-3d { transition: none; }
+}

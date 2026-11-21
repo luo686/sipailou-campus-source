@@ -1,0 +1,47 @@
+@font-face{font-family:'Campus Reading Sans';src:url('fonts/reading-sans.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+body:has(.directory),#app:has(.directory){background:#fff}
+#app:has(.directory){color:#202124;font-family:'Campus Reading Sans',Arial,sans-serif}
+#app:has(.directory) .breadcrumbs{color:#777;font-size:12px}
+.directory-head{padding:34px 0 28px;background:none;text-align:center}
+.directory-head::before{display:none}
+.directory-head .section-kicker{display:none}
+.directory-head h1{font-family:inherit;font-size:32px;font-weight:400;line-height:1.3;color:#202124;margin:0 0 14px;letter-spacing:0}
+.directory-head>p:not(.section-kicker){color:#62645b;font-size:15px;line-height:1.65;max-width:620px;margin:0 auto 26px}
+.directory-head .building-search{margin-inline:auto;text-align:left}
+.directory-head .search-box{background:#fff;border:1px solid #e4e4e4;border-radius:26px;overflow:hidden}
+.directory-head .building-search button[type=submit]{background:#202124;color:#fff;border-radius:22px}
+.directory-head .building-search button[type=submit]:hover{background:#444}
+.directory-head .building-suggestions{background:#fff;border-color:#ddd}
+.directory-head .building-suggestions li[aria-selected=true]{background:#f2f2f2}
+.directory .result-count{border:0;text-align:center;color:#737373;font-size:12px;margin:0 0 26px;padding:0}
+.directory.wrap{width:min(900px,calc(100% - 96px))}
+.directory .building-grid{grid-template-columns:minmax(0,1fr);gap:24px}
+.directory .building-card{position:relative;isolation:isolate;display:grid;min-width:0;width:100%;aspect-ratio:1.78;min-height:210px;border:0;border-radius:12px;overflow:hidden;background:#28312b;padding:0;box-shadow:none;color:#fff}
+.directory .card-photo{position:absolute;inset:0;aspect-ratio:auto;background:transparent;z-index:0}
+.directory .card-photo::after{content:'';position:absolute;inset:0;background:#0006;pointer-events:none}
+.directory .card-photo img{display:block;width:100%;height:100%;object-fit:cover;transition:none;transform:none}
+.directory .building-card:hover .card-photo img{transform:none}
+.directory .card-copy{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center;pointer-events:none}
+.directory .card-copy::before{content:'校园建筑';font-size:clamp(16px,2.5vw,24px);line-height:1.4;color:#fff;text-shadow:0 1px 6px #0009}
+html:lang(en) .directory .card-copy::before{content:'Campus Architecture'}
+.directory .card-copy h3{display:block;font-family:inherit;font-size:clamp(25px,3.8vw,40px);font-weight:400;line-height:1.35;color:#fff;margin:0;max-width:100%;overflow-wrap:anywhere;text-shadow:0 1px 8px #0009}
+.directory .card-copy h3::before{content:'';display:block;width:26px;height:2px;background:#fff;margin:16px auto}
+.directory .card-copy h3 span{display:none}
+/* The full introduction remains on the destination page. */
+.directory .card-copy p{display:none}
+.directory .building-card:focus-visible{outline:3px solid #1a73e8;outline-offset:4px}
+.directory .search-results-enter>.building-card{animation:none}
+.directory [data-progressive-reveal]{will-change:opacity}
+@media(max-width:700px){
+ .directory-head.wrap,.directory.wrap{width:calc(100% - 44px)}
+ .directory-head{padding:26px 0 20px}
+ .directory-head h1{font-size:26px}
+ .directory-head>p:not(.section-kicker){font-size:14px;margin-bottom:22px}
+ .directory .building-grid{gap:14px}
+ .directory .building-card{min-height:190px;border-radius:10px}
+ .directory .card-copy{padding:24px 18px}
+ .directory .card-copy h3{font-size:clamp(23px,6.2vw,32px)}
+ html:lang(en) .directory .card-copy h3{font-size:clamp(21px,5.5vw,28px)}
+ .directory .card-copy h3::before{margin:12px auto}
+}
+@media(prefers-reduced-motion:reduce){.directory [data-progressive-reveal]{opacity:1!important;will-change:auto}}

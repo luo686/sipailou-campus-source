@@ -1,0 +1,42 @@
+.hall-tour .flame-entry{position:absolute;z-index:5;left:16px;top:16px;max-width:calc(50% - 24px);padding:11px 18px;background:#faf9f6;color:#26272a;border:1px solid #d6d6d8;border-radius:20px;font:500 14px/1.3 system-ui;white-space:normal;text-align:left;cursor:pointer}
+.flame-dialog[open]{position:fixed;inset:0;margin:0;padding:0;width:100vw;height:100dvh;max-width:none;max-height:none;border:none;overflow:hidden;background:#faf9f6;color:#202124}
+.flame-dialog::backdrop{background:#faf9f6}
+.flame-dialog canvas{display:block;width:100%;height:100%;cursor:pointer;touch-action:none;outline-offset:-6px}
+.flame-dialog footer{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:10px;background:linear-gradient(transparent,#faf9f6 25%);color:#68686d;padding:24px max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom));font:12px/1.5 system-ui}
+.flame-dialog footer button{position:static;inset:auto;flex:none;font:inherit;background:none;color:inherit;border:1px solid #ccc;border-radius:32px;padding:7px 12px;cursor:pointer}
+.flame-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;flex:none}
+.flame-dialog [hidden]{display:none!important}
+.flame-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.flame-welcome{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:25px;padding:32px 24px;background:#fff;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+.welcome-eyebrow{margin:0;color:#86868b;letter-spacing:.28em;font-size:11px;animation:welcome-reveal .35s both}
+.flame-welcome h1{max-width:100%;margin:0;color:#1d1d1f;font-size:clamp(30px,7vw,64px);font-weight:600;line-height:1.4;letter-spacing:-.035em;animation:welcome-reveal .45s cubic-bezier(.2,.65,.3,1) both;text-wrap:balance}
+.flame-dialog .flame-start{position:static;inset:auto;margin-top:28px;min-height:48px;padding:12px 30px;border:1px solid #d2d2d7;border-radius:99px;color:#1d1d1f;background:transparent;font:500 15px/1.4 system-ui;opacity:0;visibility:hidden;cursor:pointer}
+.flame-start.ready{visibility:visible;animation:welcome-reveal .3s both}
+.welcome-loading{max-width:30ch;color:#86868b;font-size:13px}
+.flame-dialog button:focus-visible{outline:2px solid #0071e3;outline-offset:5px}
+@keyframes welcome-reveal{from{opacity:0;filter:blur(7px);transform:translateY(12px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.flame-welcome h1,.welcome-eyebrow,.flame-start.ready{animation:none;opacity:1;filter:none;transform:none}}
+/* Shared manuscript reader; per-building content roles define the page composition. */
+.flame-dialog.manuscript-reader{background:#fafafa;color:#352c20}
+.flame-dialog.manuscript-reader[data-phase="reading"]{overflow-y:auto;overscroll-behavior:contain}
+.flame-dialog.manuscript-reader canvas{-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.flame-dialog.manuscript-reader .flame-welcome{background:#fff}
+.flame-dialog.manuscript-reader .welcome-eyebrow{font-family:"Postcard Latin",cursive;color:#65513a;letter-spacing:.12em}
+.flame-dialog.manuscript-reader .flame-welcome h1{font-family:"Postcard Hand","Kaiti SC",KaiTi,serif;font-weight:400;color:#352c20;font-size:clamp(38px,9vw,76px);letter-spacing:.04em}
+.flame-dialog.manuscript-reader .flame-start{color:#443323;border-color:#72573d80;font-family:"Songti SC",SimSun,serif;border-radius:3px;background:#ffffff40}
+.flame-dialog.manuscript-reader footer{position:fixed;background:linear-gradient(transparent,#fcfcfb 30%);color:#51412d;font-family:Georgia,"Songti SC",SimSun,serif}
+.flame-dialog.manuscript-reader footer button{border-color:transparent;border-radius:3px;color:#7c756c;text-decoration:underline;text-underline-offset:4px}
+@media(orientation:portrait) and (max-width:599px){
+  .flame-dialog.manuscript-reader canvas{min-height:760px}
+}
+@media(orientation:landscape) and (min-width:500px) and (max-width:649px){
+  .flame-dialog.manuscript-reader canvas{min-height:420px}
+}
+@media(orientation:landscape) and (min-width:500px){
+  .flame-dialog.manuscript-reader footer{padding:8px max(20px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom))}
+  .flame-dialog.manuscript-reader footer button{padding:5px 8px}
+}
+
+.flame-dialog.manuscript-reader{scrollbar-width:none}
+.flame-dialog.manuscript-reader::-webkit-scrollbar{display:none}
+.flame-dialog.manuscript-reader .flame-welcome:lang(en) h1{font-family:"Postcard Latin",cursive}

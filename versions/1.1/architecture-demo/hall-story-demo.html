@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大礼堂 · 3D 滚动漫游</title>
+<link rel="stylesheet" href="assets/hall-story.css?v=3">
+<script src="assets/hall-3d-vendor.js?v=169" defer></script>
+<script src="assets/hall-model.js?v=3" defer></script>
+<script src="assets/hall-story.js?v=12" defer></script>
+<link rel="stylesheet" href="assets/hall-tour.css?v=3">
+<script>document.addEventListener("DOMContentLoaded", () => mountHallTour(document.querySelector(".hall-tour")));</script>
+</head>
+<body>
+<header class="story-header">
+  <a href="index.html?lang=zh-CN#buildings">‹ 校园建筑</a>
+  <nav aria-label="漫游视角">
+    <a href="#axis" aria-current="location">中轴</a>
+    <a href="#portico">门廊</a>
+    <a href="#side">侧翼</a>
+    <a href="#dome">穹顶</a>
+  </nav>
+</header>
+<main>
+  <section class="tour hall-tour" aria-label="大礼堂 3D 漫游">
+    <div id="axis" class="stop"></div>
+    <div id="portico" class="stop"></div>
+    <div id="side" class="stop"></div>
+    <div id="dome" class="stop"></div>
+    <div class="stage">
+      <div class="model" aria-label="大礼堂建筑概念模型">
+        <img class="model-fallback" src="../assets/photos/archives/hall/06.jpg" alt="从广场望向大礼堂">
+      </div>
+      <div class="stage-copy">
+        <h1>大礼堂</h1>
+        <div class="chapter">
+          <h2>沿中轴走近</h2>
+          <p>穿过中央大道与广场，走向涌泉和礼堂正门。</p>
+        </div>
+        <div class="chapter" hidden>
+          <h2>门廊与台阶</h2>
+          <p>拾阶而上，爱奥尼柱与三角山花构成正面的门廊。</p>
+        </div>
+        <div class="chapter" hidden>
+          <h2>绕到礼堂侧翼</h2>
+          <p>视线沿立面转向侧翼。1965 年，两翼各增建了三层教室。</p>
+        </div>
+        <div class="chapter" hidden>
+          <h2>从上方看穹顶</h2>
+          <p>铜质穹顶最高处距地面约 34 米。</p>
+        </div>
+      </div>
+      <div class="progress" aria-hidden="true"><i></i></div>
+    </div>
+  </section>
+  <section class="visit" aria-labelledby="visit-title">
+    <img src="../assets/photos/hall.jpg" alt="秋日的大礼堂与堂前的涌泉" loading="lazy" width="800" height="512">
+    <div>
+      <h2 id="visit-title">到四牌楼看大礼堂</h2>
+      <p>大礼堂于 1931 年落成，今天仍用于学校典礼与集会。</p>
+      <a href="map.html?building=hall&amp;lang=zh-CN">查看地图 ↗</a>
+      <a href="index.html?lang=zh-CN#building/hall">完整建筑档案 ↗</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>
