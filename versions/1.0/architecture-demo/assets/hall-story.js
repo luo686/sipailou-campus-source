@@ -1,24 +1,35 @@
 'use strict';
 
-const hallRuntimes = new Map();
-function loadHallRuntime(isHall) {
-  if (isHall && typeof Hall3DVendor !== 'undefined' && typeof buildHall === 'function') return Promise.resolve(Hall3DVendor.THREE);
-  if (!isHall && typeof HallThree !== 'undefined') return Promise.resolve(HallThree);
-  if (!hallRuntimes.has(isHall)) {
-    const files = isHall ? ['hall-3d-vendor.js?v=169', 'hall-model.js?v=3'] : ['hall-three.min.js'];
-    const runtime = Promise.all(files.map(file => new Promise((resolve, reject) => {
-      const script = document.createElement('script');
+const tourScripts = new Map();
+function loadTourScript(file) {
+  if (!tourScripts.has(file)) {
+    const script = document.createElement('script');
+    const ready = new Promise((resolve, reject) => {
       script.src = 'assets/' + file;
       script.onload = resolve;
-      script.onerror = () => { script.remove(); reject(new Error(file)); };
-      document.head.append(script);
-    }))).then(() => isHall ? Hall3DVendor.THREE : HallThree).catch(error => {
-      hallRuntimes.delete(isHall);
-      throw error;
+      script.onerror = () => {
+        script.remove();
+        tourScripts.delete(file);
+        reject(new Error(file));
+      };
     });
-    hallRuntimes.set(isHall, runtime);
+    tourScripts.set(file, ready);
+    document.head.append(script);
   }
-  return hallRuntimes.get(isHall);
+  return tourScripts.get(file);
+}
+
+async function loadHallRuntime(isHall) {
+  const scripts = [];
+  if (typeof Hall3DVendor === 'undefined') scripts.push(loadTourScript('hall-3d-vendor.js?v=169'));
+  if (isHall) {
+    if (typeof buildHall !== 'function') scripts.push(loadTourScript('hall-model.js?v=3'));
+  } else {
+    if (typeof makeExistingCampusModel !== 'function') scripts.push(loadTourScript('campus-existing-models.js?v=1'));
+    if (typeof makeCampusBuilding !== 'function') scripts.push(loadTourScript('campus-building-models.js?v=1'));
+  }
+  await Promise.all(scripts);
+  return Hall3DVendor.THREE;
 }
 
 function hallTourMarkup(building) {
@@ -108,7 +119,19 @@ function mountHallTour(tour) {
     scene.background = new THREE.Color('#e6e3d6');
     scene.fog = new THREE.Fog('#e6e3d6', 55, 105);
     if (isHall) buildHall(scene, THREE);
-    else buildCampusMassing(scene, buildingId);
+    else {
+      const size = buildCampusMassing(scene, buildingId, THREE, () => {
+        if (!signal.aborted) queueRender();
+      });
+      if (size) {
+        const center = size.y * .43;
+        const depth = size.z / 2;
+        views[0].eye = [2, center+5, 45+depth];
+        views[1].eye = [12, center+6, 34+depth*.68];
+        views[2].eye = [32, center+15, 29+depth*.55];
+        views.forEach(view => { view.center = [0, center, 0]; });
+      }
+    }
     const path = new THREE.CatmullRomCurve3(views.map(view => new THREE.Vector3(...view.eye)));
     const target = new THREE.CatmullRomCurve3(views.map(view => new THREE.Vector3(...view.center)));
     const camera = new THREE.PerspectiveCamera(39, 1, .1, 200);
@@ -243,6 +266,7 @@ function mountHallTour(tour) {
     const { scene, renderer } = world;
     scene.traverse(object => {
       object.geometry?.dispose();
+      object.material?.map?.dispose();
       object.material?.dispose();
       object.shadow?.dispose();
     });
