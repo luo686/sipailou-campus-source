@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 260" fill="none">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" stroke="#8f785c" stroke-width=".6" opacity=".32"/>
+    </pattern>
+  </defs>
+  <rect x="20" y="20" width="520" height="220" fill="url(#grid)"/>
+  <g stroke="#92734e" stroke-width="1" opacity=".55">
+    <path d="M20 40V20H40m480 0h20v20M20 220v20h20m480 0h20v-20"/>
+    <path d="M280 25v212M35 217h490" stroke-dasharray="3 5"/>
+    <circle cx="280" cy="117" r="88"/>
+    <circle cx="280" cy="117" r="76"/>
+  </g>
+  <g stroke="#8f7451" stroke-width="1.4" stroke-linejoin="round">
+    <path d="M74 211h412m-397-7h382m-371-8h360M114 196v-53h102m128 0h102v53m-343-53 28-19h92m114 0h92l28 19"/>
+    <path d="M215 196v-53h130v53M204 145l76-36 76 36H204Zm19-4h114l-57-26-57 26Z"/>
+    <path d="M245 125v-24h70v24m-77-24h84m-79-5h74c-3-24-17-41-37-41s-34 17-37 41Zm37-41V43m-6 0h12"/>
+    <path d="M256 96c2-17 9-32 24-41 15 9 22 24 24 41M280 55v41m-23 8v12m12-12v6m22-6v6m12-6v12"/>
+    <path d="M222 149h16m-13 0v43m10-43v43m-13 0h16m14-43h16m-13 0v43m10-43v43m-13 0h16m24-43h16m-13 0v43m10-43v43m-13 0h16m14-43h16m-13 0v43m10-43v43m-13 0h16"/>
+    <path d="M272 196v-26a8 8 0 0 1 16 0v26m-157-11v-22h16v22Zm28 0v-22h16v22Zm28 0v-22h16v22Zm170 0v-22h16v22Zm28 0v-22h16v22Zm28 0v-22h16v22Z"/>
+    <path d="M114 153h100m132 0h100M104 189h111m130 0h111"/>
+  </g>
+</svg>

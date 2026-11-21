@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>东南大学 · 校友唱片馆</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script defer src="vendor/three.min.js"></script>
+  <script defer src="../assets/alumni-data.js"></script>
+  <script defer src="demo.js?v=5"></script>
+</head>
+<body>
+  <main id="shelf">
+    <header>
+      <strong><i aria-hidden="true"></i><span id="gallery-title">校友唱片馆</span></strong>
+      <span id="status"></span>
+      <span id="university">东南大学</span>
+    </header>
+    <div id="stage" aria-label="唱片架，左右拖动或使用方向键，按回车抽出唱片" tabindex="0"></div>
+    <section class="controls">
+      <button id="previous" type="button" aria-label="上一张">←</button>
+      <button id="open" type="button" aria-label="抽出唱片"></button>
+      <button id="next" type="button" aria-label="下一张">→</button>
+    </section>
+    <nav id="timeline" aria-label="选择唱片"></nav>
+  </main>
+  <section id="detail" hidden>
+    <button id="back" type="button">← 返回唱片架</button>
+    <span id="watermark" aria-hidden="true"></span>
+    <div class="detail-grid">
+      <div class="details">
+        <small id="edition"></small>
+        <h1 id="title"></h1>
+        <ol id="tracks" aria-label="校友名单"></ol>
+        <button id="play" type="button" aria-pressed="false">▷ 转动唱片</button>
+      </div>
+      <div id="art-position" aria-hidden="true"></div>
+    </div>
+  </section>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <dialog id="profile" aria-labelledby="profile-title">
+    <button id="profile-close" type="button" aria-label="关闭人物介绍">×</button>
+    <div id="profile-content"></div>
+  </dialog>
+  <output id="error" hidden>0</output>
+</body>
+</html>

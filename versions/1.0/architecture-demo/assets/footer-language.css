@@ -1,0 +1,60 @@
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 76px 24px 24px;
+  border: 0;
+  background: #fff;
+  color: #303033;
+}
+.site-footer::before {
+  inset: 0;
+  opacity: .55;
+  background: url('auditorium-engraving.svg') center 8px / 300px auto no-repeat;
+  pointer-events: none;
+}
+.translation-toggle {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: 156px;
+  height: 40px;
+  padding: 3px;
+  border-radius: 22px;
+  background: #ededee;
+  font-family: 'Campus Reading Sans', Arial, sans-serif;
+}
+.translation-toggle::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 2);
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 1px 4px #00000021, 0 1px 2px #0000000a;
+  transform: translateX(0);
+  transition: transform 220ms cubic-bezier(.22,.68,0,1.01);
+  z-index: -1;
+}
+.translation-toggle[data-language='en']::before { transform: translateX(100%); }
+.translation-toggle button {
+  border: 0;
+  border-radius: 19px;
+  padding: 0;
+  min-width: 0;
+  min-height: 34px;
+  background: transparent;
+  color: #777;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.translation-toggle button[aria-pressed='true'] { color: #202124; font-weight: 500; }
+.translation-toggle button:focus-visible { outline: 2px solid #937342; outline-offset: -2px; }
+@media(prefers-reduced-motion:reduce) { .translation-toggle::before { transition: none; } }
