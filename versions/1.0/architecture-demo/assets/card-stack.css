@@ -1,0 +1,19 @@
+.card-stack{display:grid;justify-items:center;gap:32px;padding:48px 0;overflow:hidden;background:#fff;border-bottom:1px solid var(--line)}
+.card-stack-stage{--width:min(330px,68vw,48svh);width:calc(var(--width) + 60px);height:calc(var(--width)*1.49);position:relative;touch-action:pan-y;user-select:none;cursor:grab;outline:none}.card-stack-stage:active{cursor:grabbing}.stack-card{position:absolute;top:0;left:0;width:var(--width);height:100%;border-radius:7px;overflow:hidden;background:#ddd;transform-origin:center;will-change:transform,opacity;transition:transform 680ms cubic-bezier(.25,.7,.25,1),opacity 680ms ease;box-shadow:0 3px 9px #0000000a}.stack-card:nth-child(1){background:#c7d8e8}.stack-card:nth-child(2){background:#d7cce3}.stack-card:nth-child(3){background:#c9dcd2}.stack-card:nth-child(4){background:#e7d4c4}.stack-card.no-motion{transition:none}.stack-controls{display:flex;gap:14px;align-items:center}.card-stack button{border:0;width:40px;height:40px;border-radius:50%;background:#eeeeef;color:#555;cursor:pointer;display:grid;place-items:center;font:20px system-ui}.card-stack button:hover{background:#e2e2e5}.card-stack button:focus-visible,.card-stack-stage:focus-visible{outline:2px solid #707781;outline-offset:6px}.stack-dots{display:flex;gap:6px;margin:0 5px}.card-stack .stack-dot{width:18px;height:34px;border-radius:5px;background:transparent}.stack-dot:before{content:'';width:5px;height:5px;border-radius:100%;background:#ccc}.stack-dot[aria-current=true]:before{background:#555}.card-stack .stack-dot:hover{background:transparent}.card-stack .stack-play{font-size:13px}.stack-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}@media(prefers-reduced-motion:reduce){.stack-card{transition:none}}
+
+.stack-card-copy{position:absolute;inset:auto 24px 28px;color:#253747}.stack-card-copy h2{font-size:23px;margin-bottom:8px}.stack-card-copy p{font-size:14px;margin:0;opacity:.7}.stack-card-number{font-size:12px;letter-spacing:.12em;display:block;margin-bottom:14px}
+
+/* Four illustrated destinations, matching the campus navigation palette. */
+.card-stack .stack-card { border-radius: 25px; color: #fffaf2; box-shadow: none; cursor: pointer; }
+.card-stack .stack-card:nth-child(1) { background: #ad4030; }
+.card-stack .stack-card:nth-child(2) { background: #204760; }
+.card-stack .stack-card:nth-child(3) { background: #247367; }
+.stack-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, #ffffff09, transparent 75%); pointer-events: none; }
+.card-stack .stack-artwork { position: absolute; top: 15%; left: 13%; width: 74%; height: 55%; }
+.card-stack .stack-card-copy { inset: auto 26px 30px; color: inherit; }
+.card-stack .stack-card-copy h2 { font: 500 clamp(23px, 6.4vw, 32px)/1.25 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif; margin: 0 0 19px; letter-spacing: -.02em; }
+.stack-card-rule { display: block; width: 43px; height: 4px; border-radius: 4px; background: currentColor; }
+.stack-card:focus-visible { outline: 3px solid #223f53; outline-offset: 5px; }
+.card-stack .stack-dot[aria-current=true]::before { background: #ad4030; }
+.card-stack .stack-dot::before { width: 8px; height: 8px; }
+@media (max-width: 360px) { .card-stack .stack-card-copy { left: 20px; right: 15px; } html:lang(en) .stack-card-copy h2 { font-size: 23px; } }

@@ -610,7 +610,8 @@ window.CAMPUS_PUBLISHED_BUILDINGS = [
         "credit": "美篇作者“缘来缘去”，仅作研究参考",
         "portraitRatio": 0.61983
       }
-    ]
+    ],
+    "cover": "./assets/covers/dongnan-trees.webp"
   },
   {
     "id": "mengfang-library",
@@ -1149,7 +1150,8 @@ window.CAMPUS_PUBLISHED_BUILDINGS = [
         "caption": "前工院庭院",
         "credit": "猫猫的日记本，CC BY-SA 3.0，Wikimedia Commons"
       }
-    ]
+    ],
+    "cover": "./assets/covers/qiangong-trees.webp"
   },
   {
     "id": "south-gate",
@@ -1309,7 +1311,8 @@ window.CAMPUS_PUBLISHED_BUILDINGS = [
         "credit": "美篇作者“缘来缘去”，仅作研究参考",
         "portraitRatio": 0.51493
       }
-    ]
+    ],
+    "cover": "./assets/covers/jinling-trees.webp"
   },
   {
     "id": "alumni-hall",
@@ -1383,7 +1386,8 @@ window.CAMPUS_PUBLISHED_BUILDINGS = [
         "caption": "校友会堂文保挂牌",
         "credit": "南京市住房保障和房产局"
       }
-    ]
+    ],
+    "cover": "./assets/covers/alumni-hall-trees.webp"
   },
   {
     "id": "wusi",
@@ -1642,7 +1646,8 @@ window.CAMPUS_PUBLISHED_BUILDINGS = [
         "caption": "五五楼历史照片",
         "credit": "东南大学校史馆"
       }
-    ]
+    ],
+    "cover": "./assets/covers/wuwu-trees.webp"
   },
   {
     "id": "power-building",
@@ -1712,7 +1717,8 @@ window.CAMPUS_PUBLISHED_BUILDINGS = [
         "caption": "动力楼历史照片",
         "credit": "东南大学校史馆"
       }
-    ]
+    ],
+    "cover": "./assets/covers/power-building-trees.webp"
   },
   {
     "id": "wu-memorial",

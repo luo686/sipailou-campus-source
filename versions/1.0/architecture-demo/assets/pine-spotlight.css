@@ -1,0 +1,28 @@
+.pine-spotlight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px 22px 100px;
+  background: #fff;
+  color: #3c4043;
+  text-align: center;
+}
+/* Intentionally blank until the spotlight image is supplied. */
+.pine-spotlight-image {
+  width: min(61vw, 360px);
+  aspect-ratio: 1;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+}
+.pine-spotlight-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pine-spotlight h2 {
+  max-width: 700px;
+  margin: 26px 0 0;
+  font-family: 'Campus Reading Sans', Arial, sans-serif;
+  font-weight: 400;
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1.35;
+  letter-spacing: 0;
+}
