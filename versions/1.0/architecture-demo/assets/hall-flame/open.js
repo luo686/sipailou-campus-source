@@ -9,12 +9,12 @@ async function openBuildingFlame(opener, english, building) {
   dialog.dataset.building = building.id;
   dialog.lang = english ? 'en' : 'zh-CN';
   dialog.setAttribute('aria-label', building.name + (english ? ' tour' : '导览'));
-  dialog.innerHTML = '<canvas tabindex="0" role="button"></canvas><p class="flame-sr" aria-live="polite"></p><footer hidden><span></span><button type="button"></button></footer><section class="flame-welcome"><p class="welcome-eyebrow">SIPAILOU</p><h1></h1><button class="flame-start" type="button" disabled></button><p class="welcome-loading" role="status"></p></section>';
+  dialog.innerHTML = '<canvas tabindex="0" role="button"></canvas><p class="flame-sr" aria-live="polite"></p><footer hidden><span></span><div class="flame-actions"><button class="flame-skip" type="button" hidden></button><button class="flame-exit" type="button"></button></div></footer><section class="flame-welcome"><p class="welcome-eyebrow">SIPAILOU</p><h1></h1><button class="flame-start" type="button" disabled></button><p class="welcome-loading" role="status"></p></section>';
   const welcome = dialog.querySelector('.flame-welcome');
   welcome.querySelector('h1').textContent = (english ? 'Welcome to ' : '欢迎来到') + building.name;
   const start = welcome.querySelector('button');
   start.textContent = english ? 'Touch the screen' : '轻触屏幕';
-  const exit = dialog.querySelector('footer button');
+  const exit = dialog.querySelector('.flame-exit');
   exit.textContent = english ? 'Return to building' : '返回建筑详情';
   exit.onclick = () => dialog.close();
   const previousOverflow = document.documentElement.style.overflow;
@@ -22,11 +22,10 @@ async function openBuildingFlame(opener, english, building) {
   document.body.append(dialog);
   dialog.showModal();
   document.documentElement.style.overflow = 'hidden';
-  let dispose, readyTimer;
+  let dispose;
   const leave = () => { if (dialog.open) dialog.close(); };
   window.addEventListener('hashchange', leave);
   dialog.onclose = () => {
-    clearTimeout(readyTimer);
     dispose?.();
     window.removeEventListener('hashchange', leave);
     dialog.remove();
@@ -37,7 +36,7 @@ async function openBuildingFlame(opener, english, building) {
   try {
     hallReaderAssets ||= Promise.all(['burn-model','live-shader','manuscript','reader'].map(name => new Promise((resolve,reject) => {
       const script = document.createElement('script');
-      script.src = 'assets/hall-flame/' + name + '.js?v=7';
+      script.src = 'assets/hall-flame/' + name + '.js?v=8';
       script.onload = resolve;
       script.onerror = () => { script.remove(); reject(new Error(name)); };
       document.head.append(script);
@@ -50,11 +49,8 @@ async function openBuildingFlame(opener, english, building) {
     if (!dialog.open) return;
     dispose = await startBuildingReader(dialog, english, building);
     if (!dialog.open) { dispose?.(); return; }
-    readyTimer = setTimeout(() => {
-      if (!dialog.open) return;
-      start.disabled = false;
-      start.classList.add('ready');
-    }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1800);
+    start.disabled = false;
+    start.classList.add('ready');
     start.onclick = () => {
       if (start.disabled || dialog.dataset.phase !== 'welcome') return;
       dialog.dataset.phase = 'reading';

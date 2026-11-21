@@ -42,7 +42,9 @@ class BuildingMap extends Phaser.Scene{
  create(){
   this.drawCampus();
   const target=selectedTarget;
-  const cam=this.cameras.main;let zoom=.8;
+  const cam=this.cameras.main;
+  const initialZoom=()=>matchMedia('(max-width: 640px) and (pointer: coarse)').matches?1:.8;
+  let zoom=initialZoom();
   cam.setBounds(0,0,WORLD.w,WORLD.h).setZoom(zoom);
   const focus=()=>{if(target)cam.centerOn(target.x+target.w/2,target.y+target.h/2);else cam.centerOn(WORLD.w/2,WORLD.h/2)};
   focus();
@@ -70,7 +72,7 @@ class BuildingMap extends Phaser.Scene{
   const release=ev=>{pointers.delete(ev.pointerId);if(canvas.hasPointerCapture(ev.pointerId))canvas.releasePointerCapture(ev.pointerId);canvas.style.cursor=pointers.size?'grabbing':'grab'};
   const wheel=ev=>{ev.preventDefault();const delta=ev.deltaY*(ev.deltaMode===1?16:ev.deltaMode===2?this.scale.height:1);transform(zoom*Math.exp(-Math.max(-500,Math.min(500,delta))*.0015),point(ev))};
   const center=()=>({x:cam.width/2,y:cam.height/2});
-  const reset=()=>{zoom=.8;cam.setZoom(zoom);focus()};
+  const reset=()=>{zoom=initialZoom();cam.setZoom(zoom);focus()};
   const keydown=ev=>{
    if(ev.altKey||ev.ctrlKey||ev.metaKey)return;
    const pan={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[ev.key];
