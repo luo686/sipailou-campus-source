@@ -5,7 +5,7 @@ function loadHallRuntime(isHall) {
   if (isHall && typeof Hall3DVendor !== 'undefined' && typeof buildHall === 'function') return Promise.resolve(Hall3DVendor.THREE);
   if (!isHall && typeof HallThree !== 'undefined') return Promise.resolve(HallThree);
   if (!hallRuntimes.has(isHall)) {
-    const files = isHall ? ['hall-3d-vendor.js?v=169', 'hall-model.js?v=2'] : ['hall-three.min.js'];
+    const files = isHall ? ['hall-3d-vendor.js?v=169', 'hall-model.js?v=3'] : ['hall-three.min.js'];
     const runtime = Promise.all(files.map(file => new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = 'assets/' + file;

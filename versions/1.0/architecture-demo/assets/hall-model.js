@@ -311,14 +311,103 @@ function addHallModel(THREE, scene) {
   return hall;
 }
 
+function addHallFountain(THREE, scene) {
+  const fountain = new THREE.Group();
+  fountain.name = '八角形喷泉';
+  fountain.position.z = 14.7;
+  scene.add(fountain);
+
+  const granite = new THREE.MeshStandardMaterial({ color: '#a49b8c', roughness: .9, flatShading: true });
+  const coping = new THREE.MeshStandardMaterial({ color: '#c4b8a4', roughness: .8, flatShading: true });
+  const bronze = new THREE.MeshStandardMaterial({ color: '#334836', roughness: .52, metalness: .3 });
+  const rim = new THREE.MeshStandardMaterial({ color: '#52634b', roughness: .51, metalness: .26 });
+  const poolWater = new THREE.MeshStandardMaterial({ color: '#24747a', roughness: .25, metalness: .13 });
+  const spray = new THREE.MeshStandardMaterial({
+    color: '#c1edf0', emissive: '#3f747c', roughness: .25, transparent: true,
+    opacity: .48, depthWrite: false, side: THREE.DoubleSide
+  });
+
+  function mesh(geometry, material, x = 0, y = 0, z = 0) {
+    const object = new THREE.Mesh(geometry, material);
+    object.position.set(x, y, z);
+    object.castShadow = !material.transparent;
+    object.receiveShadow = true;
+    fountain.add(object);
+    return object;
+  }
+  function lathe(profile, segments) {
+    return new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), segments);
+  }
+  function octagonalRing(profile, material) {
+    const ring = mesh(lathe(profile, 8), material);
+    ring.rotation.y = Math.PI / 8;
+  }
+
+  octagonalRing([[6.63, .02], [7.58, .02], [7.74, .15], [7.68, .24], [6.63, .24], [6.63, .02]], granite);
+  octagonalRing([[6.46, .02], [6.95, .02], [7.03, .46], [6.97, .55], [6.53, .55], [6.46, .43], [6.46, .02]], coping);
+  const basin = mesh(new THREE.CylinderGeometry(6.52, 6.52, .06, 8), poolWater, 0, .35, 0);
+  basin.rotation.y = Math.PI / 8;
+
+  // The inscription slab is on the side of the pool opposite the auditorium.
+  const plaque = mesh(new THREE.BoxGeometry(2.8, .17, .82), coping, 0, .65, 6.34);
+  plaque.rotation.x = -.14;
+
+  const column = new THREE.CylinderGeometry(.115, .135, 1.46, 12);
+  const foot = new THREE.CylinderGeometry(.15, .17, .09, 12);
+  for (const x of [-.38, .38]) {
+    for (const z of [-.38, .38]) {
+      mesh(column, bronze, x, 1.11, z);
+      mesh(foot, rim, x, .42, z);
+    }
+  }
+  mesh(lathe([[.08, 1.78], [.53, 1.78], [.92, 1.91], [1.3, 2.14], [1.43, 2.3],
+    [1.42, 2.36], [1.32, 2.36], [1.25, 2.25], [.75, 2.13], [.08, 2.13], [.08, 1.78]], 48), bronze);
+  const upperWater = mesh(new THREE.CylinderGeometry(1.29, 1.27, .035, 48), poolWater, 0, 2.28, 0);
+  upperWater.castShadow = false;
+  mesh(new THREE.TorusGeometry(1.42, .028, 8, 48), rim, 0, 2.34, 0).rotation.x = Math.PI / 2;
+  mesh(new THREE.CylinderGeometry(.056, .085, .11, 10), bronze, 0, 2.35, 0);
+
+  const bell = lathe([[.025, .36], [.13, .36], [.24, .29], [.34, .15], [.38, 0]], 20);
+  const nozzle = new THREE.CylinderGeometry(.035, .049, .42, 8);
+  const bells = [];
+  // Match the three rows of sprays seen in the overhead photograph.
+  for (const [x, z] of [[-.98, 2.55], [1.08, 2.55], [-2.62, 1], [2.55, 1.03],
+    [-2.61, -1.06], [2.49, -1.02], [-.96, -2.5], [1.12, -2.52]]) {
+    mesh(nozzle, bronze, x, .54, z);
+    bells.push(mesh(bell, spray, x, .38, z));
+  }
+
+  const sprayPositions = new Float32Array(180 * 3);
+  const particles = new THREE.BufferGeometry();
+  const position = new THREE.BufferAttribute(sprayPositions, 3);
+  position.setUsage(THREE.DynamicDrawUsage);
+  particles.setAttribute('position', position);
+  const plume = new THREE.Points(particles, new THREE.PointsMaterial({
+    color: '#e3f7f6', size: .052, transparent: true, opacity: .87, depthWrite: false
+  }));
+  plume.frustumCulled = false;
+  fountain.add(plume);
+
+  function update(time) {
+    bells.forEach((item, i) => item.scale.setScalar(1 + .05 * Math.sin(time * 4 + i)));
+    for (let i = 0; i < position.count; i++) {
+      const phase = (i * .6180339 + time * (.54 + (i % 9) * .036)) % 1;
+      const angle = i * 2.399963 + time;
+      const spread = .028 + (.06 + (i % 13) * .006) * phase;
+      const height = (3.3 + (i % 17) * .122) * phase * (1 - phase);
+      position.setXYZ(i, Math.cos(angle) * spread, 2.39 + height, Math.sin(angle) * spread);
+    }
+    position.needsUpdate = true;
+  }
+  update(0);
+  return update;
+}
+
 function buildHall(scene, THREE) {
 scene.add(new THREE.HemisphereLight('#e7f4ff','#a48c71',2.4));const sun=new THREE.DirectionalLight('#fff0d9',3.2);sun.position.set(-15,27,18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-35;sun.shadow.camera.right=35;sun.shadow.camera.top=35;sun.shadow.camera.bottom=-35;sun.shadow.bias=-.00025;scene.add(sun);
-const mat=(c,roughness=1,metalness=0)=>new THREE.MeshStandardMaterial({color:c,roughness,metalness});const stone=mat('#d4bfa5'),path=mat('#c5baa5'),grass=mat('#a7af92'),water=new THREE.MeshStandardMaterial({color:'#6caaa9',metalness:.45,roughness:.22,transparent:true,opacity:.88});
-function box(w,h,d,x,y,z,m,parent=scene){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}function cyl(rt,rb,h,x,y,z,m,n=48){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,n),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+const mat=(c,roughness=1,metalness=0)=>new THREE.MeshStandardMaterial({color:c,roughness,metalness});const path=mat('#c5baa5'),grass=mat('#a7af92');
+function box(w,h,d,x,y,z,m,parent=scene){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 const ground=box(110,.4,110,0,-.28,0,grass);ground.castShadow=false;box(34,.12,40,0,-.04,7,path);
 addHallModel(THREE, scene);
-// circular fountain: concentric rim, water disk, central pedestal, animated jets
-const fountainZ=13.4;const ringGeo=new THREE.TorusGeometry(5.4,.48,14,96);const rim=new THREE.Mesh(ringGeo,stone);rim.rotation.x=Math.PI/2;rim.position.set(0,.62,fountainZ);rim.castShadow=true;scene.add(rim);cyl(5.4,5.4,.4,0,.27,fountainZ,stone,96);cyl(4.95,4.95,.06,0,.53,fountainZ,water,96);cyl(1.15,1.55,.65,0,.92,fountainZ,stone,32);cyl(.55,.8,.6,0,1.53,fountainZ,stone,32);const jetMaterial=new THREE.MeshStandardMaterial({color:'#b8e5e5',transparent:true,opacity:.75,roughness:.12,metalness:.1});const jets=[];for(let i=0;i<12;i++){const a=i*Math.PI/6;const x=Math.cos(a)*3.4,z=fountainZ+Math.sin(a)*3.4;const jet=new THREE.Mesh(new THREE.CylinderGeometry(.025,.07,1.5,7),jetMaterial);jet.position.set(x,1.27,z);jet.rotation.z=Math.cos(a)*.3;jet.rotation.x=-Math.sin(a)*.3;scene.add(jet);jets.push(jet)}const centerJet=new THREE.Mesh(new THREE.CylinderGeometry(.04,.11,2.7,9),jetMaterial);centerJet.position.set(0,3.05,fountainZ);scene.add(centerJet);
-// trees in formal landscape
-function tree(x,z,r=1){cyl(.16,.21,2.3,x,1.15,z,mat('#76624b'),9);const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),mat('#637d5b'));crown.position.set(x,3.05,z);crown.castShadow=true;scene.add(crown)}for(let s of [-1,1]){for(let i=0;i<4;i++)tree(s*20,-17+i*10,1.6+(i%2)*.35);for(let i=0;i<3;i++)tree(s*14,7+i*7,1.25)}
+addHallFountain(THREE, scene);
 }
