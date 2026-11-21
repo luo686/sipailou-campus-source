@@ -2,14 +2,14 @@
 
 function buildingRecommendationGallery(items) {
   if (!items.length) return '';
-  const image = building => coverImage(building.photo ? building : { ...building, photo: building.cover });
+  const image = building => coverImage(building.cover ? { ...building, photo: building.cover } : building);
   const tile = (building, index, copy) => copy
     ? `<span class="recommendation-tile" data-index="${index}">${image(building)}</span>`
     : `<button type="button" class="recommendation-tile" data-index="${index}" tabindex="-1" aria-label="${esc(building.name)}">${image(building)}</button>`;
   return `<section class="recommendation-gallery" aria-labelledby="recommendation-title">
     <header class="recommendation-heading wrap">
       <h2 id="recommendation-title">${esc(t('keepExploring'))}</h2>
-      <p>${isEnglish ? 'Swipe to browse and open the featured building.' : '左右滑动浏览，点击中央照片继续参观。'}</p>
+      <p>${isEnglish ? 'Swipe to browse and open the featured building.' : '左右滑动浏览，点击中央封面继续参观。'}</p>
     </header>
     <div class="recommendation-window">
       <div class="recommendation-marquee">${[false, true].map(copy =>
